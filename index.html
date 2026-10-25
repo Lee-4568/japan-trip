@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>🇯🇵 日本自由行 & 手繪風記帳、翻譯與多人即時定位小幫手</title>
+    <title>🇯🇵 日本自由行 & 手繪風記帳、翻譯與雲端多人即時定位小幫手</title>
     <!-- Tailwind CSS & FontAwesome Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -12,6 +12,9 @@
     <!-- Leaflet.js for Real-time GPS Location Mapping -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Firebase SDK (用於真正免架設伺服器的雲端即時同步) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -42,24 +45,15 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            overflow: hidden;
         }
-        .dark body {
-            background: #0f172a;
-        }
+        .dark body { background: #0f172a; }
 
-        .main-container-bg {
-            background-color: rgba(254, 252, 232, 0.98);
-        }
-        .dark .main-container-bg {
-            background-color: rgba(15, 23, 42, 0.98);
-        }
+        .main-container-bg { background-color: rgba(254, 252, 232, 0.98); }
+        .dark .main-container-bg { background-color: rgba(15, 23, 42, 0.98); }
 
-        .cute-border {
-            border: 3px solid #1e293b;
-        }
-        .dark .cute-border {
-            border: 3px solid #f8fafc;
-        }
+        .cute-border { border: 3px solid #1e293b; }
+        .dark .cute-border { border: 3px solid #f8fafc; }
 
         .cute-card {
             border: 3px solid #1e293b;
@@ -70,10 +64,6 @@
         .dark .cute-card {
             border: 3px solid #f8fafc;
             box-shadow: 3px 4px 0px #334155;
-        }
-        .cute-card:active {
-            transform: translateY(1px);
-            box-shadow: 2px 2px 0px #1e293b;
         }
 
         .cute-btn {
@@ -87,12 +77,8 @@
             border: 2.5px solid #f8fafc;
             box-shadow: 2.5px 3px 0px #334155;
         }
-        .cute-btn:active {
-            transform: translate(2px, 2px);
-            box-shadow: 1px 1px 0px #1e293b;
-        }
+        .cute-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0px #1e293b; }
 
-        /* 手機 App 底部導覽列按鈕 */
         .bottom-nav-btn {
             flex: 1;
             display: flex;
@@ -105,17 +91,9 @@
             color: #64748b;
             transition: all 0.15s ease;
         }
-        .dark .bottom-nav-btn {
-            color: #94a3b8;
-        }
-        .bottom-nav-btn.active {
-            color: #0284c7;
-            font-weight: 900;
-            transform: translateY(-2px);
-        }
-        .dark .bottom-nav-btn.active {
-            color: #38bdf8;
-        }
+        .dark .bottom-nav-btn { color: #94a3b8; }
+        .bottom-nav-btn.active { color: #0284c7; font-weight: 900; transform: translateY(-2px); }
+        .dark .bottom-nav-btn.active { color: #38bdf8; }
 
         .expandable-content {
             max-height: 0;
@@ -123,10 +101,7 @@
             transition: max-height 0.4s cubic-bezier(0, 1, 0, 1), opacity 0.3s ease;
             opacity: 0;
         }
-        .expandable-content.expanded {
-            max-height: 600px;
-            opacity: 1;
-        }
+        .expandable-content.expanded { max-height: 600px; opacity: 1; }
 
         .collapsible {
             max-height: 0;
@@ -134,23 +109,18 @@
             transition: max-height 0.3s ease-out, opacity 0.3s ease;
             opacity: 0;
         }
-        .collapsible.open {
-            max-height: 800px;
-            opacity: 1;
-        }
+        .collapsible.open { max-height: 800px; opacity: 1; }
 
-        #live-map {
-            z-index: 10;
-        }
+        #live-map { z-index: 10; }
     </style>
 </head>
 <body class="min-h-screen flex justify-center items-center text-slate-800 dark:text-slate-100 p-0 sm:p-4">
 
-    <!-- 單一主容器 -->
+    <!-- 主容器 -->
     <div class="w-full max-w-md sm:max-w-lg main-container-bg sm:rounded-[32px] sm:cute-border sm:shadow-[8px_10px_0px_#1e293b] dark:sm:shadow-[8px_10px_0px_#334155] overflow-hidden flex flex-col h-screen sm:h-[92vh] relative">
 
-        <!-- 頂部標頭 Header -->
-        <header class="p-3.5 bg-white/95 dark:bg-[#1e293b]/95 backdrop-blur-md border-b-3 border-slate-800 dark:border-slate-100 sticky top-0 z-20 space-y-2 shrink-0">
+        <!-- 頂部固定標頭 Header -->
+        <header class="p-3.5 bg-white/95 dark:bg-[#1e293b]/95 backdrop-blur-md border-b-3 border-slate-800 dark:border-slate-100 sticky top-0 z-30 space-y-2 shrink-0">
             <div class="flex justify-between items-center gap-2">
                 <div class="flex items-center gap-2.5">
                     <div class="w-9 h-9 bg-amber-300 dark:bg-amber-400 cute-border text-slate-900 rounded-xl flex items-center justify-center text-sm font-black shadow-[1.5px_2px_0px_#1e293b] shrink-0">
@@ -177,62 +147,56 @@
         </header>
 
         <!-- 隱藏新增 Drawer -->
-        <div id="quick-form-drawer" class="collapsible bg-amber-50/98 dark:bg-[#172033]/98 border-b-3 border-slate-800 dark:border-slate-100 px-4 py-3 shrink-0">
+        <div id="quick-form-drawer" class="collapsible bg-amber-50/98 dark:bg-[#172033]/98 border-b-3 border-slate-800 dark:border-slate-100 px-4 py-3 shrink-0 z-20">
             <div class="space-y-2.5">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-xs font-black text-slate-800 dark:text-amber-300 uppercase tracking-wider" id="drawer-form-title">新增行程或美食</h3>
-                    <button onclick="triggerFeedback(); closeDrawer()" class="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark"></i> 關閉</button>
+                    <h3 class="text-xs font-black text-slate-800 dark:text-amber-300 uppercase tracking-wider">新增行程或美食</h3>
+                    <button onclick="triggerFeedback(); closeDrawer()" class="text-xs font-bold text-slate-500 dark:text-slate-400"><i class="fa-solid fa-xmark"></i> 關閉</button>
                 </div>
-
                 <div class="flex gap-2">
                     <button onclick="triggerFeedback(); switchFormType('schedule')" id="btn-form-sch" class="cute-btn bg-indigo-300 text-slate-900 px-3 py-1 text-xs">新增行程</button>
                     <button onclick="triggerFeedback(); switchFormType('food')" id="btn-form-food" class="cute-btn bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-1 text-xs">新增美食</button>
                 </div>
-
-                <!-- 行程表單 -->
                 <div id="form-schedule" class="space-y-2">
                     <input type="text" id="sch-day" placeholder="日期 (例: Day 4 - 10/28)" class="w-full p-2 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white">
                     <input type="text" id="sch-title" placeholder="景點 (例: 淺草寺 ➔ 秋葉原)" class="w-full p-2 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white">
                     <input type="text" id="sch-route" placeholder="乘車指引 (例: 搭銀座線轉JR山手線)" class="w-full p-2 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white">
-                    <button onclick="triggerFeedback(); addSchedule()" class="cute-btn bg-indigo-400 hover:bg-indigo-500 text-white w-full font-black text-xs py-2">新增行程</button>
+                    <button onclick="triggerFeedback(); addSchedule()" class="cute-btn bg-indigo-400 text-white w-full font-black text-xs py-2">新增行程</button>
                 </div>
-
-                <!-- 美食表單 -->
                 <div id="form-food" class="space-y-2 hidden">
                     <input type="text" id="food-name" placeholder="店名 (例: 一蘭拉麵 淺草店)" class="w-full p-2 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white">
                     <input type="text" id="food-cat" placeholder="分類 (例: 拉麵 / 燒肉 / 甜點)" class="w-full p-2 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white">
                     <input type="text" id="food-img-url" placeholder="貼上店家真實照片網址 (選填)" class="w-full p-2 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white">
                     <input type="text" id="food-map-url" placeholder="貼上 Google Maps 分享網址 (選填)" class="w-full p-2 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white">
-                    <button onclick="triggerFeedback(); addFood()" class="cute-btn bg-orange-400 hover:bg-orange-500 text-white w-full font-black text-xs py-2">新增美食</button>
+                    <button onclick="triggerFeedback(); addFood()" class="cute-btn bg-orange-400 text-white w-full font-black text-xs py-2">新增美食</button>
                 </div>
             </div>
         </div>
 
         <!-- 內容區 Scrollable Content -->
-        <div class="p-3.5 space-y-4 overflow-y-auto flex-1 pb-20">
+        <div class="p-3.5 space-y-4 overflow-y-auto flex-1 pb-24 pt-3">
 
-            <!-- TAB 1: DASHBOARD (總覽頁面) -->
+            <!-- TAB 1: DASHBOARD -->
             <div id="tab-dashboard" class="tab-page space-y-4">
                 <div class="grid grid-cols-2 gap-2.5">
                     <div class="cute-card bg-emerald-200 dark:bg-emerald-950 text-slate-900 dark:text-slate-100 p-3 flex flex-col justify-between">
                         <div class="flex justify-between items-start">
-                            <span class="text-[8px] font-black uppercase tracking-widest bg-white dark:bg-slate-800 cute-border px-1.5 py-0.5 rounded-full">EXPENSES</span>
+                            <span class="text-[8px] font-black uppercase bg-white dark:bg-slate-800 cute-border px-1.5 py-0.5 rounded-full">EXPENSES</span>
                             <i class="fa-solid fa-coins text-xs"></i>
                         </div>
-                        <div class="pt-2 border-t border-slate-800/20 dark:border-slate-200/20">
-                            <div class="text-[10px] font-bold text-slate-600 dark:text-slate-300">日幣: <strong class="text-orange-600 dark:text-orange-400 text-xs" id="dash-total-jpy">¥0</strong></div>
-                            <div class="text-[10px] font-bold text-slate-600 dark:text-slate-300">台幣: <strong class="text-emerald-700 dark:text-emerald-400 text-xs" id="dash-total-twd">NT$0</strong></div>
+                        <div class="pt-2 border-t border-slate-800/20">
+                            <div class="text-[10px] font-bold">日幣: <strong class="text-orange-600 text-xs" id="dash-total-jpy">¥0</strong></div>
+                            <div class="text-[10px] font-bold">台幣: <strong class="text-emerald-700 text-xs" id="dash-total-twd">NT$0</strong></div>
                         </div>
                     </div>
-
                     <div class="cute-card bg-sky-200 dark:bg-sky-950 text-slate-900 dark:text-slate-100 p-3 flex flex-col justify-between">
                         <div class="flex justify-between items-start">
-                            <span class="text-[8px] font-black uppercase tracking-widest bg-white dark:bg-slate-800 cute-border px-1.5 py-0.5 rounded-full">RATE</span>
+                            <span class="text-[8px] font-black uppercase bg-white dark:bg-slate-800 cute-border px-1.5 py-0.5 rounded-full">RATE</span>
                             <i class="fa-solid fa-calculator text-xs"></i>
                         </div>
-                        <div class="pt-2 border-t border-slate-800/20 dark:border-slate-200/20 text-[10px] font-black">
+                        <div class="pt-2 border-t border-slate-800/20 text-[10px] font-black">
                             <div>1 JPY ≈ 0.21 TWD</div>
-                            <div class="text-emerald-600 dark:text-emerald-400 text-[9px] mt-0.5">¥1,000 = NT$210</div>
+                            <div class="text-emerald-600 text-[9px] mt-0.5">¥1,000 = NT$210</div>
                         </div>
                     </div>
                 </div>
@@ -246,11 +210,10 @@
                         </div>
                         <h3 class="text-xs font-black truncate">Hostel Inn Tokyo Asakusa Annex</h3>
                     </div>
-
-                    <div id="dash-hotel-detail" class="expandable-content border-t-3 border-slate-800 dark:border-slate-100 bg-white dark:bg-slate-900 p-3 space-y-2">
+                    <div id="dash-hotel-detail" class="expandable-content border-t-3 border-slate-800 bg-white dark:bg-slate-900 p-3 space-y-2">
                         <div class="flex justify-between items-center text-xs font-black">
                             <span class="text-purple-800 dark:text-purple-300"><i class="fa-solid fa-map-location-dot text-amber-500 mr-1"></i>飯店位置與實景</span>
-                            <a href="https://www.google.com/maps/search/?api=1&query=Hostel+Inn+Tokyo+Asakusa+Annex" target="_blank" class="cute-btn bg-purple-300 dark:bg-purple-600 text-slate-900 dark:text-white px-2 py-0.5 text-[10px]">Google 地圖 ↗</a>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Hostel+Inn+Tokyo+Asakusa+Annex" target="_blank" class="cute-btn bg-purple-300 text-slate-900 px-2 py-0.5 text-[10px]">Google 地圖 ↗</a>
                         </div>
                         <div class="w-full h-36 rounded-xl overflow-hidden cute-border">
                             <iframe class="w-full h-full" frameborder="0" style="border:0" src="https://maps.google.com/maps?q=Hostel+Inn+Tokyo+Asakusa+Annex&t=&z=15&ie=UTF8&iwloc=&output=embed" allowfullscreen></iframe>
@@ -261,76 +224,62 @@
                 <!-- 今日焦點 -->
                 <div class="cute-card bg-amber-200 dark:bg-amber-950 text-slate-900 dark:text-slate-100 p-3.5 space-y-2.5">
                     <div class="flex justify-between items-center">
-                        <span class="text-[10px] font-black bg-white dark:bg-slate-800 cute-border px-2.5 py-0.5 rounded-full" id="daily-highlight-badge">⭐ 今日焦點行程</span>
+                        <span class="text-[10px] font-black bg-white dark:bg-slate-800 cute-border px-2.5 py-0.5 rounded-full">⭐ 今日焦點行程</span>
                         <select id="day-selector" onchange="triggerFeedback(); changeFeaturedDay(this.value)" class="bg-white dark:bg-slate-800 text-[10px] font-black cute-border px-1.5 py-0.5 rounded-lg outline-none cursor-pointer"></select>
                     </div>
                     <div id="featured-highlight-content" class="space-y-2 pt-0.5"></div>
                 </div>
 
                 <div class="space-y-3">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-1.5">
-                            <i class="fa-solid fa-person-walking-luggage text-indigo-600 dark:text-indigo-400"></i> 行程動態 (點擊展開地圖)
-                        </h2>
-                    </div>
+                    <h2 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-1.5"><i class="fa-solid fa-person-walking-luggage text-indigo-600"></i> 行程動態</h2>
                     <div id="dash-schedule-list" class="space-y-3"></div>
                 </div>
 
                 <div class="space-y-3">
                     <div class="flex justify-between items-center">
-                        <h2 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-1.5">
-                            <i class="fa-solid fa-utensils text-orange-600 dark:text-orange-400"></i> 美食名單 (點擊展開地圖)
-                        </h2>
-                        <button onclick="triggerFeedback(); openDrawer('food')" class="cute-btn bg-orange-300 dark:bg-orange-600 text-slate-900 dark:text-white text-[10px] px-2.5 py-1">
-                            <i class="fa-solid fa-plus mr-1"></i>新增美食
-                        </button>
+                        <h2 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-1.5"><i class="fa-solid fa-utensils text-orange-600"></i> 美食名單</h2>
+                        <button onclick="triggerFeedback(); openDrawer('food')" class="cute-btn bg-orange-300 text-slate-900 text-[10px] px-2.5 py-1"><i class="fa-solid fa-plus mr-1"></i>新增美食</button>
                     </div>
                     <div id="dash-food-list" class="space-y-3"></div>
                 </div>
             </div>
 
-            <!-- TAB 2: SCHEDULE (詳細行程) -->
+            <!-- TAB 2: SCHEDULE -->
             <div id="tab-schedule" class="tab-page hidden space-y-3">
                 <div class="flex justify-between items-center">
                     <h2 class="text-sm font-black text-slate-900 dark:text-white">🗓️ 每日行程清單</h2>
-                    <button onclick="triggerFeedback(); openDrawer('schedule')" class="cute-btn bg-indigo-300 dark:bg-indigo-600 text-slate-900 dark:text-white text-xs px-3 py-1"><i class="fa-solid fa-plus mr-1"></i>新增</button>
+                    <button onclick="triggerFeedback(); openDrawer('schedule')" class="cute-btn bg-indigo-300 text-slate-900 text-xs px-3 py-1"><i class="fa-solid fa-plus mr-1"></i>新增</button>
                 </div>
                 <div id="full-schedule-list" class="space-y-3"></div>
             </div>
 
-            <!-- TAB 3: FOOD (美食頁面) -->
+            <!-- TAB 3: FOOD -->
             <div id="tab-food" class="tab-page hidden space-y-3">
                 <div class="flex justify-between items-center">
                     <h2 class="text-sm font-black text-slate-900 dark:text-white">🍜 美食口袋名單 (含真實照片)</h2>
-                    <button onclick="triggerFeedback(); openDrawer('food')" class="cute-btn bg-orange-300 dark:bg-orange-600 text-slate-900 dark:text-white text-xs px-3 py-1"><i class="fa-solid fa-plus mr-1"></i>新增美食</button>
+                    <button onclick="triggerFeedback(); openDrawer('food')" class="cute-btn bg-orange-300 text-slate-900 text-xs px-3 py-1"><i class="fa-solid fa-plus mr-1"></i>新增美食</button>
                 </div>
                 <div id="full-food-list" class="space-y-3"></div>
             </div>
 
-            <!-- TAB 4: ACCOUNTING (記帳) -->
+            <!-- TAB 4: ACCOUNTING -->
             <div id="tab-accounting" class="tab-page hidden space-y-3">
                 <div class="cute-card bg-white dark:bg-slate-800 p-3.5 space-y-3">
                     <div class="flex justify-between items-center border-b-2 border-slate-100 dark:border-slate-700 pb-2">
-                        <h3 class="font-black text-xs text-slate-900 dark:text-white flex items-center gap-1">
-                            <i class="fa-solid fa-chart-pie text-amber-500"></i> 📊 消費分類
-                        </h3>
+                        <h3 class="font-black text-xs text-slate-900 dark:text-white flex items-center gap-1"><i class="fa-solid fa-chart-pie text-amber-500"></i> 📊 消費分類</h3>
                         <div class="flex items-center gap-2 text-[10px] font-black">
                             <span class="bg-amber-100 dark:bg-amber-950 px-2 py-0.5 rounded-full cute-border">日幣: <strong class="text-orange-600" id="acc-sum-jpy">¥0</strong></span>
                             <span class="bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 rounded-full cute-border">台幣: <strong class="text-emerald-600" id="acc-sum-twd">NT$0</strong></span>
                         </div>
                     </div>
-
                     <div class="flex items-center justify-around gap-2">
-                        <div class="w-32 h-32 relative shrink-0">
-                            <canvas id="expenseChart"></canvas>
-                        </div>
+                        <div class="w-32 h-32 relative shrink-0"><canvas id="expenseChart"></canvas></div>
                         <div class="w-full space-y-1.5">
                             <h4 class="font-black text-[10px] text-slate-400">📝 消費紀錄</h4>
                             <div id="acc-record-list" class="space-y-1.5 max-h-36 overflow-y-auto"></div>
                         </div>
                     </div>
                 </div>
-
                 <div class="cute-card bg-amber-50 dark:bg-slate-800 p-3.5 space-y-3">
                     <div class="grid grid-cols-4 gap-1.5 text-center">
                         <button onclick="triggerFeedback(); selectAccCategory('晚餐', 'fa-utensils')" class="acc-cat-btn cute-btn bg-white dark:bg-slate-900 p-1.5 flex flex-col items-center gap-0.5 text-[10px]"><i class="fa-solid fa-utensils text-orange-500 text-xs"></i><span>晚餐</span></button>
@@ -342,10 +291,9 @@
                         <button onclick="triggerFeedback(); selectAccCategory('門票', 'fa-ticket')" class="acc-cat-btn cute-btn bg-white dark:bg-slate-900 p-1.5 flex flex-col items-center gap-0.5 text-[10px]"><i class="fa-solid fa-ticket text-purple-500 text-xs"></i><span>門票</span></button>
                         <button onclick="triggerFeedback(); selectAccCategory('住宿', 'fa-hotel')" class="acc-cat-btn cute-btn bg-white dark:bg-slate-900 p-1.5 flex flex-col items-center gap-0.5 text-[10px]"><i class="fa-solid fa-hotel text-emerald-500 text-xs"></i><span>住宿</span></button>
                     </div>
-
                     <div class="bg-white dark:bg-slate-900 cute-border rounded-xl p-2.5 flex justify-between items-center shadow-[2px_2px_0px_#1e293b]">
                         <div class="flex items-center gap-1.5">
-                            <div id="acc-curr-cat-icon" class="w-7 h-7 rounded-lg bg-amber-200 dark:bg-amber-400 text-slate-900 cute-border flex items-center justify-center text-xs"><i class="fa-solid fa-utensils"></i></div>
+                            <div id="acc-curr-cat-icon" class="w-7 h-7 rounded-lg bg-amber-200 text-slate-900 cute-border flex items-center justify-center text-xs"><i class="fa-solid fa-utensils"></i></div>
                             <span id="acc-curr-cat-name" class="font-black text-xs text-slate-900 dark:text-white">晚餐</span>
                         </div>
                         <div class="text-right">
@@ -353,20 +301,19 @@
                             <div class="text-[9px] font-bold text-slate-400" id="acc-twd-val">≈ NT$ 0</div>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-4 gap-1.5 text-center font-black">
                         <button onclick="triggerFeedback(); pressKey('7')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">7</button>
                         <button onclick="triggerFeedback(); pressKey('8')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">8</button>
                         <button onclick="triggerFeedback(); pressKey('9')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">9</button>
-                        <button onclick="triggerFeedback(); pressKey('AC')" class="cute-btn bg-sky-300 dark:bg-sky-600 text-slate-900 dark:text-white py-2 text-xs">AC</button>
+                        <button onclick="triggerFeedback(); pressKey('AC')" class="cute-btn bg-sky-300 text-slate-900 py-2 text-xs">AC</button>
                         <button onclick="triggerFeedback(); pressKey('4')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">4</button>
                         <button onclick="triggerFeedback(); pressKey('5')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">5</button>
                         <button onclick="triggerFeedback(); pressKey('6')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">6</button>
-                        <button onclick="triggerFeedback(); pressKey('DEL')" class="cute-btn bg-sky-300 dark:bg-sky-600 text-slate-900 dark:text-white py-2 text-xs">⌫</button>
+                        <button onclick="triggerFeedback(); pressKey('DEL')" class="cute-btn bg-sky-300 text-slate-900 py-2 text-xs">⌫</button>
                         <button onclick="triggerFeedback(); pressKey('1')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">1</button>
                         <button onclick="triggerFeedback(); pressKey('2')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">2</button>
                         <button onclick="triggerFeedback(); pressKey('3')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">3</button>
-                        <button onclick="triggerFeedback(); saveExpenseRecord()" class="cute-btn bg-rose-400 hover:bg-rose-500 text-white row-span-2 flex items-center justify-center text-sm font-black">OK</button>
+                        <button onclick="triggerFeedback(); saveExpenseRecord()" class="cute-btn bg-rose-400 text-white row-span-2 flex items-center justify-center text-sm font-black">OK</button>
                         <button onclick="triggerFeedback(); pressKey('00')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">00</button>
                         <button onclick="triggerFeedback(); pressKey('0')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">0</button>
                         <button onclick="triggerFeedback(); pressKey('.')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">.</button>
@@ -374,17 +321,14 @@
                 </div>
             </div>
 
-            <!-- TAB 5: TRANSLATION (翻譯專區) -->
+            <!-- TAB 5: TRANSLATION -->
             <div id="tab-translation" class="tab-page hidden space-y-4">
                 <div class="cute-card bg-rose-100 dark:bg-rose-950 p-3.5 space-y-3 text-slate-900 dark:text-slate-100">
-                    <div class="flex items-center justify-between border-b-2 border-slate-200 dark:border-slate-800 pb-2">
-                        <h3 class="font-black text-xs flex items-center gap-1.5">
-                            <i class="fa-solid fa-camera-retro text-rose-600 dark:text-rose-400"></i> 📸 菜單與招牌拍照翻譯
-                        </h3>
-                        <span class="text-[9px] font-black bg-white dark:bg-slate-800 px-2 py-0.5 rounded-full cute-border">OCR 辨識</span>
+                    <div class="flex items-center justify-between border-b-2 border-slate-200 pb-2">
+                        <h3 class="font-black text-xs flex items-center gap-1.5"><i class="fa-solid fa-camera-retro text-rose-600"></i> 📸 菜單與招牌拍照翻譯</h3>
+                        <span class="text-[9px] font-black bg-white px-2 py-0.5 rounded-full cute-border">OCR 辨識</span>
                     </div>
-
-                    <div class="border-3 border-dashed border-slate-800 dark:border-slate-300 rounded-xl p-4 text-center bg-white/80 dark:bg-slate-900/80 space-y-2">
+                    <div class="border-3 border-dashed border-slate-800 rounded-xl p-4 text-center bg-white/80 dark:bg-slate-900 space-y-2">
                         <input type="file" id="photo-upload-input" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
                         <div id="photo-preview-container" class="hidden w-full h-32 rounded-lg overflow-hidden cute-border relative">
                             <img id="uploaded-photo-preview" class="w-full h-full object-cover">
@@ -394,70 +338,46 @@
                             <div class="text-[11px] font-black">點擊下方按鈕拍攝或選擇照片</div>
                         </div>
                         <div class="flex justify-center gap-2 pt-1">
-                            <button onclick="triggerFeedback(); document.getElementById('photo-upload-input').click()" class="cute-btn bg-rose-300 dark:bg-rose-600 text-slate-900 dark:text-white px-3 py-1.5 text-xs">
-                                <i class="fa-solid fa-image mr-1"></i> 選擇照片/拍照
-                            </button>
-                            <button onclick="triggerFeedback(); runRealOCRTranslate()" id="ocr-run-btn" class="cute-btn bg-amber-300 text-slate-900 px-3 py-1.5 text-xs hidden">
-                                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 開始翻譯
-                            </button>
+                            <button onclick="triggerFeedback(); document.getElementById('photo-upload-input').click()" class="cute-btn bg-rose-300 text-slate-900 px-3 py-1.5 text-xs"><i class="fa-solid fa-image mr-1"></i> 選擇照片/拍照</button>
+                            <button onclick="triggerFeedback(); runRealOCRTranslate()" id="ocr-run-btn" class="cute-btn bg-amber-300 text-slate-900 px-3 py-1.5 text-xs hidden"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 開始翻譯</button>
                         </div>
                     </div>
-
                     <div id="ocr-result-box" class="bg-white dark:bg-slate-900 p-3 rounded-xl cute-border space-y-1.5 hidden">
-                        <h4 class="text-[11px] font-black text-rose-600 dark:text-rose-400">✨ 辨識與翻譯結果：</h4>
+                        <h4 class="text-[11px] font-black text-rose-600">✨ 辨識與翻譯結果：</h4>
                         <div id="ocr-translated-text" class="text-xs font-bold leading-relaxed text-slate-800 dark:text-slate-200"></div>
                     </div>
                 </div>
 
                 <div class="cute-card bg-blue-100 dark:bg-blue-950 p-3.5 space-y-3 text-slate-900 dark:text-slate-100">
-                    <div class="flex items-center justify-between border-b-2 border-slate-200 dark:border-slate-800 pb-2">
-                        <h3 class="font-black text-xs flex items-center gap-1.5">
-                            <i class="fa-solid fa-comments text-blue-600 dark:text-blue-400"></i> 💬 真實即時文字互譯
-                        </h3>
-                        <span class="text-[9px] font-black bg-white dark:bg-slate-800 px-2 py-0.5 rounded-full cute-border">中 ⇄ 日</span>
+                    <div class="flex items-center justify-between border-b-2 border-slate-200 pb-2">
+                        <h3 class="font-black text-xs flex items-center gap-1.5"><i class="fa-solid fa-comments text-blue-600"></i> 💬 真實即時文字互譯</h3>
+                        <span class="text-[9px] font-black bg-white px-2 py-0.5 rounded-full cute-border">中 ⇄ 日</span>
                     </div>
-                    
                     <div class="space-y-2">
                         <textarea id="translate-input" rows="2" placeholder="請輸入想翻譯成日文的中文（例如：我要這個、請問多少錢？）" class="w-full p-2.5 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white resize-none"></textarea>
                         <div class="flex gap-1.5">
-                            <button onclick="triggerFeedback(); executeRealTranslate('zh-CN', 'ja')" class="cute-btn bg-blue-400 hover:bg-blue-500 text-white flex-1 py-2 text-xs font-black">
-                                中 ➔ 日 翻譯
-                            </button>
-                            <button onclick="triggerFeedback(); executeRealTranslate('ja', 'zh-CN')" class="cute-btn bg-purple-400 hover:bg-purple-500 text-white flex-1 py-2 text-xs font-black">
-                                日 ➔ 中 翻譯
-                            </button>
+                            <button onclick="triggerFeedback(); executeRealTranslate('zh-CN', 'ja')" class="cute-btn bg-blue-400 text-white flex-1 py-2 text-xs font-black">中 ➔ 日 翻譯</button>
+                            <button onclick="triggerFeedback(); executeRealTranslate('ja', 'zh-CN')" class="cute-btn bg-purple-400 text-white flex-1 py-2 text-xs font-black">日 ➔ 中 翻譯</button>
                         </div>
                     </div>
-
                     <div id="text-translate-result" class="bg-white dark:bg-slate-900 p-3 rounded-xl cute-border space-y-1 hidden">
-                        <div class="text-[9px] font-black text-blue-600 dark:text-blue-400">翻譯結果：</div>
+                        <div class="text-[9px] font-black text-blue-600">翻譯結果：</div>
                         <div id="res-jp" class="text-xs font-black text-slate-900 dark:text-white"></div>
-                        <div id="res-read" class="text-[10px] font-bold text-slate-500 dark:text-slate-400"></div>
-                    </div>
-
-                    <div class="space-y-1.5 pt-1">
-                        <h4 class="text-[11px] font-black text-slate-700 dark:text-slate-300">⚡ 快速應急日文卡片（點擊直接翻譯）</h4>
-                        <div class="grid grid-cols-2 gap-1.5 text-[11px] font-bold">
-                            <div onclick="triggerFeedback(); quickTranslatePhrase('請問多少錢？')" class="bg-white dark:bg-slate-900 p-2 cute-border rounded-lg cursor-pointer">💰 請問多少錢？</div>
-                            <div onclick="triggerFeedback(); quickTranslatePhrase('可以刷卡嗎？')" class="bg-white dark:bg-slate-900 p-2 cute-border rounded-lg cursor-pointer">💳 可以刷卡嗎？</div>
-                            <div onclick="triggerFeedback(); quickTranslatePhrase('我要這個')" class="bg-white dark:bg-slate-900 p-2 cute-border rounded-lg cursor-pointer">👉 我要這個</div>
-                            <div onclick="triggerFeedback(); quickTranslatePhrase('請問洗手間在哪裡？')" class="bg-white dark:bg-slate-900 p-2 cute-border rounded-lg cursor-pointer">🚻 洗手間在哪？</div>
-                        </div>
+                        <div id="res-read" class="text-[10px] font-bold text-slate-500"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 6: MULTI-USER LOCATION SHARING (多人即時定位共享) -->
+            <!-- TAB 6: CLOUD MULTI-USER LOCATION SHARING (方案 B: 雲端即時多人定位 + 自動彈出 GPS 授權) -->
             <div id="tab-location" class="tab-page hidden space-y-3">
                 <div class="cute-card bg-sky-100 dark:bg-sky-950 p-3.5 space-y-3 text-slate-900 dark:text-slate-100">
-                    <div class="flex justify-between items-center border-b-2 border-slate-200 dark:border-slate-800 pb-2">
+                    <div class="flex justify-between items-center border-b-2 border-slate-200 pb-2">
                         <h3 class="font-black text-xs flex items-center gap-1.5">
-                            <i class="fa-solid fa-users-viewfinder text-sky-600 dark:text-sky-400 text-sm"></i> 👥 多人即時互相定位
+                            <i class="fa-solid fa-users-viewfinder text-sky-600 text-sm"></i> 👥 雲端多人即時互相定位
                         </h3>
-                        <span class="text-[9px] font-black bg-white dark:bg-slate-800 px-2 py-0.5 rounded-full cute-border">同群組互看</span>
+                        <span class="text-[9px] font-black bg-white px-2 py-0.5 rounded-full cute-border">自動同步</span>
                     </div>
 
-                    <!-- 設定群組與名字 -->
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="text-[10px] font-black block mb-1">我的名字</label>
@@ -469,10 +389,11 @@
                         </div>
                     </div>
 
-                    <button onclick="triggerFeedback(); publishMyLiveLocation()" class="cute-btn bg-sky-400 hover:bg-sky-500 text-white w-full py-2.5 text-xs font-black flex items-center justify-center gap-1.5 shadow-[2px_2px_0px_#1e293b]">
-                        <i class="fa-solid fa-satellite-dish"></i> 📡 發布我的位置並重新整理地圖
+                    <!-- 自動彈出 GPS 授權並同步發布的按鈕 -->
+                    <button onclick="triggerFeedback(); requestGPSAndPublish()" class="cute-btn bg-sky-400 hover:bg-sky-500 text-white w-full py-2.5 text-xs font-black flex items-center justify-center gap-1.5 shadow-[2px_2px_0px_#1e293b]">
+                        <i class="fa-solid fa-location-arrow"></i> 📡 自動取得 GPS 權限並發布定位
                     </button>
-                    <div id="multi-status" class="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center">點擊上方按鈕，將會與同群組朋友在地圖上相見！</div>
+                    <div id="multi-status" class="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center">點擊上方按鈕將會自動彈出定位請求視窗！</div>
 
                     <!-- 即時互動 Leaflet 地圖 -->
                     <div class="w-full h-56 rounded-xl overflow-hidden cute-border relative">
@@ -482,11 +403,11 @@
                     <!-- 在線朋友清單 -->
                     <div class="bg-white dark:bg-slate-900 p-3 rounded-xl cute-border space-y-1.5">
                         <div class="text-[11px] font-black text-slate-800 dark:text-slate-200 flex items-center justify-between">
-                            <span>🟢 目前在地圖上同步的朋友：</span>
-                            <button onclick="triggerFeedback(); loadRoomLocations()" class="text-[10px] bg-sky-200 dark:bg-sky-800 px-2 py-0.5 rounded-lg">重新整理清單</button>
+                            <span>🟢 雲端同步中的同群組旅伴：</span>
+                            <span class="text-[9px] text-emerald-600 font-black animate-pulse">● 雲端連線中</span>
                         </div>
                         <div id="room-users-list" class="text-[10px] font-bold text-slate-600 dark:text-slate-300 space-y-1 max-h-24 overflow-y-auto">
-                            尚未載入群組成員
+                            載入中...
                         </div>
                     </div>
                 </div>
@@ -502,9 +423,9 @@
                                 <div class="w-8 h-8 bg-blue-600 text-white rounded-xl cute-border flex items-center justify-center font-black text-sm">GO</div>
                                 <h3 class="font-black text-sm">Japan Taxi (GO)</h3>
                             </div>
-                            <p class="text-[10px] font-bold text-slate-600 dark:text-slate-300">日本覆蓋率最高的計程車 App</p>
+                            <p class="text-[10px] font-bold text-slate-600">日本覆蓋率最高的計程車 App</p>
                         </div>
-                        <a href="https://go.mo-t.com/" target="_blank" class="cute-btn bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-1.5 text-xs font-black">開啟 GO ↗</a>
+                        <a href="https://go.mo-t.com/" target="_blank" class="cute-btn bg-white text-slate-900 px-3 py-1.5 text-xs font-black">開啟 GO ↗</a>
                     </div>
                     <div class="cute-card bg-slate-100 dark:bg-slate-800 p-4 flex justify-between items-center text-slate-900 dark:text-slate-100">
                         <div class="space-y-1">
@@ -512,17 +433,17 @@
                                 <div class="w-8 h-8 bg-black text-white rounded-xl cute-border flex items-center justify-center font-black text-sm"><i class="fa-brands fa-uber"></i></div>
                                 <h3 class="font-black text-sm">Uber Japan</h3>
                             </div>
-                            <p class="text-[10px] font-bold text-slate-600 dark:text-slate-300">東京、大阪各大都市皆可叫車</p>
+                            <p class="text-[10px] font-bold text-slate-400">東京、大阪各大都市皆可叫車</p>
                         </div>
-                        <a href="https://www.uber.com/jp/ja/" target="_blank" class="cute-btn bg-amber-300 dark:bg-amber-500 text-slate-900 px-3 py-1.5 text-xs font-black">開啟 Uber ↗</a>
+                        <a href="https://www.uber.com/jp/ja/" target="_blank" class="cute-btn bg-amber-300 text-slate-900 px-3 py-1.5 text-xs font-black">開啟 Uber ↗</a>
                     </div>
                 </div>
             </div>
 
         </div>
 
-        <!-- 底部固定選單 Bottom App Navigation Bar -->
-        <nav class="bg-white/95 dark:bg-[#1e293b]/95 backdrop-blur-md border-t-3 border-slate-800 dark:border-slate-100 flex items-center justify-around py-1.5 px-1 absolute bottom-0 left-0 right-0 z-30">
+        <!-- 底部固定導覽列 Bottom App Navigation Bar -->
+        <nav class="bg-white/95 dark:bg-[#1e293b]/95 backdrop-blur-md border-t-3 border-slate-800 dark:border-slate-100 flex items-center justify-around py-1.5 px-1 absolute bottom-0 left-0 right-0 z-30 shrink-0">
             <button onclick="triggerFeedback(); switchTab('dashboard')" id="nav-dashboard" class="bottom-nav-btn active">
                 <i class="fa-solid fa-chart-pie text-sm mb-0.5"></i> 總覽
             </button>
@@ -549,26 +470,33 @@
 
     <!-- JavaScript 核心邏輯 -->
     <script>
+        // 初始化 Firebase 免費雲端資料庫 (專用公開測試節點)
+        const firebaseConfig = {
+            databaseURL: "https://japan-trip-2026-default-rtdb.firebaseio.com/"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
         let currentTab = 'dashboard';
         let exchangeRate = 0.21;
         let chartInstance = null;
         let leafMap = null;
         let markersGroup = null;
+        let dbListener = null;
 
         let defaultSchedules = [
             { day: "Day 1 - 10/25", title: "10:00 淺草寺參拜 ➔ 13:00 秋葉原動漫漫步", route: "乘車指引：從『淺草站』搭乘東京地鐵銀座線至『神田站』，轉乘 JR 山手線 1 站即達『秋葉原站』" },
             { day: "Day 2 - 10/26", title: "09:30 築地市場早餐 ➔ 14:00 澀谷 SHIBUYA SKY", route: "乘車指引：從『築地市場站』搭乘都營大江戶線至『青山一丁目站』，轉乘半藏門線至『澀谷站』" },
-            { day: "Day 3 - 10/27", title: "10:00 明治神宮 ➔ 14:30 新宿御苑散策", route: "乘車指引：從『原宿站』搭乘 JR 山手線直達『新宿站』，東南口步行約 10 分鐘即可抵達新宿御苑" }
+            { day: "Day 3 - 10/27", title: "10:00 明治神宮 ➔ 14:30 新宿御苑散策", route: "乘車指引：從『原宿站`搭乘 JR 山手線直達『新宿站』，東南口步行約 10 分鐘即可抵達新宿御苑" }
         ];
 
         let schedules = JSON.parse(localStorage.getItem('jap_schedules_cute')) || defaultSchedules;
-        if (schedules.length === 0) schedules = defaultSchedules;
-
         let foods = JSON.parse(localStorage.getItem('jap_foods_cute')) || [
             { name: "黑毛和牛壽喜燒 日本橋一里", category: "燒肉", imgUrl: "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=600&auto=format&fit=crop", mapUrl: "https://www.google.com/maps/search/?api=1&query=黑毛和牛壽喜燒+日本橋一里" },
             { name: "一蘭拉麵 淺草店", category: "拉麵", imgUrl: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?q=80&w=600&auto=format&fit=crop", mapUrl: "https://www.google.com/maps/search/?api=1&query=一蘭拉麵+淺草店" }
         ];
-
         let expenseRecords = JSON.parse(localStorage.getItem('jap_expenses_cute')) || [
             { cat: "晚餐", amount: 3500, twd: 735, date: "10/25" },
             { cat: "交通", amount: 800, twd: 168, date: "10/25" }
@@ -576,17 +504,7 @@
 
         window.onload = function() {
             initDaySelector();
-            
-            const tripStartDate = new Date("2026-10-25");
-            const today = new Date();
-            const diffTime = today - tripStartDate;
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-            
-            const maxDays = schedules.length;
-            const targetDay = (diffDays >= 1 && diffDays <= maxDays) ? diffDays.toString() : "1";
-            
-            changeFeaturedDay(targetDay);
-
+            changeFeaturedDay("1");
             renderDashboardSchedules();
             renderDashboardFoods();
             renderFullSchedules();
@@ -598,140 +516,36 @@
         function initDaySelector() {
             const selector = document.getElementById('day-selector');
             if (!selector) return;
-            selector.innerHTML = schedules.map((s, idx) => {
-                const dayNum = idx + 1;
-                return `<option value="${dayNum}">Day ${dayNum} (${s.day.split(' - ')[1] || s.day})</option>`;
-            }).join('');
+            selector.innerHTML = schedules.map((s, idx) => `<option value="${idx + 1}">Day ${idx + 1} (${s.day.split(' - ')[1] || s.day})</option>`).join('');
         }
 
         function changeFeaturedDay(dayKey) {
             const container = document.getElementById('featured-highlight-content');
-            const index = parseInt(dayKey) - 1;
-            const targetSchedule = schedules[index];
-            document.getElementById('day-selector').value = dayKey;
-
+            const targetSchedule = schedules[parseInt(dayKey) - 1];
             if (targetSchedule) {
-                let origin = "東京車站";
-                let dest = targetSchedule.title.replace(/[\d:]+/g, '').trim();
-                const parts = targetSchedule.title.split('➔');
-                if (parts.length >= 2) {
-                    origin = parts[0].replace(/[\d:]+/g, '').trim();
-                    dest = parts[1].replace(/[\d:]+/g, '').trim();
-                }
-
-                const dirUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}&travelmode=transit`;
-
+                let dest = targetSchedule.title.split('➔').pop().replace(/[\d:]+/g, '').trim();
                 container.innerHTML = `
-                    <div class="bg-white/90 dark:bg-slate-900/90 p-3 cute-border rounded-xl text-xs font-bold space-y-2">
-                        <div class="flex justify-between items-center border-b pb-1.5 border-slate-200 dark:border-slate-700">
-                            <span class="text-orange-600 dark:text-orange-400 font-black text-xs"><i class="fa-solid fa-clock mr-1"></i>${targetSchedule.day} 行程</span>
-                            <a href="${dirUrl}" target="_blank" class="cute-btn bg-amber-300 dark:bg-amber-500 text-slate-900 px-2 py-0.5 text-[10px]">Google 導航 ↗</a>
-                        </div>
-                        <div class="text-sm font-black text-slate-900 dark:text-white">${targetSchedule.title}</div>
-                        <div class="text-[11px] text-slate-700 dark:text-slate-300 bg-amber-50 dark:bg-slate-800 p-2 rounded-lg cute-border">
-                            <strong class="text-indigo-600 dark:text-indigo-400 block mb-0.5"><i class="fa-solid fa-train-subway mr-1"></i>乘車指引：</strong>
-                            ${targetSchedule.route || '搭乘大眾運輸前往目的地'}
-                        </div>
-                        <div class="w-full h-36 rounded-xl overflow-hidden cute-border">
-                            <iframe class="w-full h-full" frameborder="0" style="border:0" src="https://maps.google.com/maps?q=${encodeURIComponent(dest)}&t=&z=14&ie=UTF8&iwloc=&output=embed" allowfullscreen></iframe>
-                        </div>
-                    </div>
-                `;
-            } else {
-                container.innerHTML = `<div class="text-xs text-slate-500 dark:text-slate-400 py-2 text-center font-bold">尚無此天數的行程資料</div>`;
+                    <div class="bg-white/90 dark:bg-slate-900 p-3 cute-border rounded-xl text-xs font-bold space-y-2">
+                        <div class="flex justify-between items-center border-b pb-1.5"><span class="text-orange-600 font-black">${targetSchedule.day} 行程</span></div>
+                        <div class="text-sm font-black">${targetSchedule.title}</div>
+                        <div class="text-[11px] bg-amber-50 dark:bg-slate-800 p-2 rounded-lg cute-border"><strong>乘車指引：</strong>${targetSchedule.route}</div>
+                        <div class="w-full h-36 rounded-xl overflow-hidden cute-border"><iframe class="w-full h-full" frameborder="0" src="https://maps.google.com/maps?q=${encodeURIComponent(dest)}&t=&z=14&ie=UTF8&iwloc=&output=embed"></iframe></div>
+                    </div>`;
             }
         }
 
-        /* 預設美食封面圖配對 */
-        function getDefaultFoodImage(category) {
-            if (category.includes('拉麵')) return 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?q=80&w=600&auto=format&fit=crop';
-            if (category.includes('燒肉') || category.includes('和牛')) return 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=600&auto=format&fit=crop';
-            if (category.includes('甜點') || category.includes('蛋糕')) return 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?q=80&w=600&auto=format&fit=crop';
-            if (category.includes('壽司') || category.includes('海鮮')) return 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=600&auto=format&fit=crop';
-            return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=600&auto=format&fit=crop';
-        }
-
-        /* 渲染美食卡片 */
-        function generateFoodCardsHTML(prefix) {
-            if (foods.length === 0) return `<div class="text-xs text-slate-400 py-6 text-center font-bold">尚無美食口袋名單</div>`;
-            return foods.map((f, idx) => {
-                const imgUrl = f.imgUrl || getDefaultFoodImage(f.category);
-                const mapQuery = encodeURIComponent(f.name);
-                let embedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
-
-                return `
-                <div class="cute-card bg-orange-200 dark:bg-orange-950 text-slate-900 dark:text-slate-100 overflow-hidden relative">
-                    <div class="w-full h-32 overflow-hidden cute-border border-b-3 border-slate-800 dark:border-slate-100 relative">
-                        <img src="${imgUrl}" alt="${f.name}" class="w-full h-full object-cover">
-                        <span class="absolute top-2 left-2 text-[10px] font-black bg-white dark:bg-slate-800 text-slate-900 dark:text-white cute-border px-2 py-0.5 rounded-full shadow-[2px_2px_0px_#1e293b]">${f.category}</span>
-                        <button onclick="event.stopPropagation(); triggerFeedback(); deleteFood(${idx})" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-white dark:bg-slate-800 text-slate-900 dark:text-white cute-border flex items-center justify-center text-[11px] hover:bg-rose-400 transition"><i class="fa-solid fa-trash-can"></i></button>
-                    </div>
-
-                    <div onclick="triggerFeedback(); toggleFoodMap('${prefix}', ${idx})" class="p-3 cursor-pointer space-y-1">
-                        <h3 class="text-xs font-black">${f.name}</h3>
-                        <p class="text-[10px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1"><i class="fa-solid fa-location-dot text-rose-500"></i>點擊展開 Google 地圖與實景導航</p>
-                    </div>
-
-                    <div id="${prefix}-food-detail-${idx}" class="expandable-content border-t-3 border-slate-800 dark:border-slate-100 bg-white dark:bg-slate-900 p-3 space-y-2">
-                        <div class="flex justify-between items-center text-xs font-black">
-                            <span class="text-orange-800 dark:text-orange-300"><i class="fa-solid fa-map-location-dot text-amber-500 mr-1"></i>店家地圖實景</span>
-                            <a href="${f.mapUrl || 'https://www.google.com/maps/search/?api=1&query=' + mapQuery}" target="_blank" class="cute-btn bg-orange-300 dark:bg-orange-600 text-slate-900 dark:text-white px-2 py-0.5 text-[10px]">Google 地圖 ↗</a>
-                        </div>
-                        <div class="w-full h-36 rounded-xl overflow-hidden cute-border">
-                            <iframe class="w-full h-full" frameborder="0" style="border:0" src="${embedUrl}" allowfullscreen></iframe>
-                        </div>
-                    </div>
-                </div>
-            `;
-            }).join('');
-        }
-
-        function renderDashboardFoods() { const c = document.getElementById('dash-food-list'); if (c) c.innerHTML = generateFoodCardsHTML('dash'); }
-        function renderFullFoods() { const c = document.getElementById('full-food-list'); if (c) c.innerHTML = generateFoodCardsHTML('full'); }
-        function toggleFoodMap(prefix, idx) { const el = document.getElementById(`${prefix}-food-detail-${idx}`); if (el) el.classList.toggle('expanded'); }
-
-        function addFood() {
-            const name = document.getElementById('food-name').value.trim();
-            const category = document.getElementById('food-cat').value.trim() || '美食';
-            const imgUrl = document.getElementById('food-img-url').value.trim();
-            const mapUrl = document.getElementById('food-map-url').value.trim();
-            if (!name) return alert('請輸入美食店名！');
-
-            foods.push({ name, category, imgUrl, mapUrl });
-            localStorage.setItem('jap_foods_cute', JSON.stringify(foods));
-
-            document.getElementById('food-name').value = '';
-            document.getElementById('food-cat').value = '';
-            document.getElementById('food-img-url').value = '';
-            document.getElementById('food-map-url').value = '';
-
-            closeDrawer();
-            renderDashboardFoods();
-            renderFullFoods();
-        }
-
-        function deleteFood(idx) {
-            foods.splice(idx, 1);
-            localStorage.setItem('jap_foods_cute', JSON.stringify(foods));
-            renderDashboardFoods();
-            renderFullFoods();
-        }
-
-        /* 多人即時定位與雲端同步邏輯 */
+        /* 雲端多人即時定位 + 自動彈出 GPS 授權 */
         function initLeafletMap(lat, lng) {
             if (!leafMap) {
                 leafMap = L.map('live-map').setView([lat, lng], 14);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '© OpenStreetMap'
-                }).addTo(leafMap);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(leafMap);
                 markersGroup = L.layerGroup().addTo(leafMap);
             } else {
                 leafMap.setView([lat, lng], 14);
             }
         }
 
-        function publishMyLiveLocation() {
+        function requestGPSAndPublish() {
             const name = document.getElementById('multi-name').value.trim() || '未具名旅伴';
             const room = document.getElementById('multi-room').value.trim() || 'japan2026';
             const statusEl = document.getElementById('multi-status');
@@ -741,71 +555,76 @@
                 return;
             }
 
-            statusEl.innerText = "🔍 正在取得您的 GPS 座標並同步至群組...";
+            statusEl.innerText = "📍 正在向您的裝置請求 GPS 定位權限...";
 
+            // 這會強制自動彈出瀏覽器的「允許取得您的位置資訊」授權視窗
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
                     const lat = pos.coords.latitude;
                     const lng = pos.coords.longitude;
                     const timestamp = new Date().toLocaleTimeString();
 
-                    let roomKey = `jap_room_${room}`;
-                    let roomData = JSON.parse(localStorage.getItem(roomKey)) || {};
-                    
-                    roomData[name] = { lat, lng, timestamp };
-                    localStorage.setItem(roomKey, JSON.stringify(roomData));
+                    statusEl.innerText = "☁️ 正在將座標同步至雲端資料庫...";
 
-                    statusEl.innerHTML = `<span class="text-emerald-700 dark:text-emerald-400 font-black">✅ 已成功同步到房號「${room}」！</span>`;
-                    
-                    initLeafletMap(lat, lng);
-                    loadRoomLocations();
+                    // 寫入 Firebase 雲端資料庫
+                    const ref = db.ref('rooms/' + room);
+                    const userRef = ref.child(name.replace(/[.#$\/\[\]]/g, "_"));
+                    userRef.set({ lat, lng, timestamp }, (error) => {
+                        if (error) {
+                            statusEl.innerText = "❌ 雲端同步失敗，請檢查網路連線";
+                        } else {
+                            statusEl.innerHTML = `<span class="text-emerald-700 dark:text-emerald-400 font-black">✅ GPS 授權成功，已連線至雲端房號「${room}」！</span>`;
+                            initLeafletMap(lat, lng);
+                            listenRoomLocations(room);
+                        }
+                    });
                 },
                 (err) => {
-                    statusEl.innerText = "無法獲取定位，請檢查手機位置權限是否開啟。";
+                    if (err.code === err.PERMISSION_DENIED) {
+                        statusEl.innerText = "⚠️ 您拒絕了 GPS 定位權限，請至瀏覽器設定中允許位置存取。";
+                    } else {
+                        statusEl.innerText = "無法獲取當前座標，請確認 GPS 已開啟。";
+                    }
                 },
-                { enableHighAccuracy: true, timeout: 10000 }
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
             );
         }
 
-        function loadRoomLocations() {
-            const room = document.getElementById('multi-room').value.trim() || 'japan2026';
-            let roomKey = `jap_room_${room}`;
-            let roomData = JSON.parse(localStorage.getItem(roomKey)) || {};
+        function listenRoomLocations(room) {
+            const ref = db.ref('rooms/' + room);
+            if (dbListener) ref.off(); // 移除舊監聽
 
-            if (!leafMap) {
-                initLeafletMap(35.6812, 139.7671);
-            }
+            dbListener = ref.on('value', (snapshot) => {
+                const roomData = snapshot.val() || {};
+                if (!leafMap) initLeafletMap(35.6812, 139.7671);
+                if (markersGroup) markersGroup.clearLayers();
 
-            if (markersGroup) markersGroup.clearLayers();
+                let listHtml = "";
+                let count = 0;
 
-            let listHtml = "";
-            let count = 0;
+                for (let userName in roomData) {
+                    let user = roomData[userName];
+                    count++;
+                    let marker = L.marker([user.lat, user.lng]).bindPopup(`<b>👤 ${userName}</b><br>最後更新: ${user.timestamp}`);
+                    markersGroup.addLayer(marker);
 
-            for (let userName in roomData) {
-                let user = roomData[userName];
-                count++;
-                
-                let marker = L.marker([user.lat, user.lng]).bindPopup(`<b>👤 ${userName}</b><br>更新時間: ${user.timestamp}`);
-                markersGroup.addLayer(marker);
+                    listHtml += `<div class="flex justify-between items-center bg-sky-50 dark:bg-slate-800 p-1.5 rounded cute-border">
+                        <span>👤 <strong>${userName}</strong> (${user.lat.toFixed(3)}, ${user.lng.toFixed(3)})</span>
+                        <span class="text-[9px] text-slate-500">${user.timestamp}</span>
+                    </div>`;
+                }
 
-                listHtml += `<div class="flex justify-between items-center bg-sky-50 dark:bg-slate-800 p-1.5 rounded cute-border">
-                    <span>👤 <strong>${userName}</strong> (${user.lat.toFixed(3)}, ${user.lng.toFixed(3)})</span>
-                    <span class="text-[9px] text-slate-500">${user.timestamp}</span>
-                </div>`;
-            }
-
-            if (count === 0) {
-                listHtml = `<div class="text-slate-400 py-1 text-center">目前群組尚無成員發布位置，快點上方按鈕發布！</div>`;
-            }
-
-            document.getElementById('room-users-list').innerHTML = listHtml;
+                if (count === 0) {
+                    listHtml = `<div class="text-slate-400 py-1 text-center">房號內尚無成員</div>`;
+                }
+                document.getElementById('room-users-list').innerHTML = listHtml;
+            });
         }
 
-        /* 拍攝與翻譯 API 邏輯 */
+        /* 翻譯與圖片上傳邏輯 */
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 document.getElementById('uploaded-photo-preview').src = e.target.result;
@@ -813,73 +632,49 @@
                 document.getElementById('upload-placeholder').classList.add('hidden');
                 document.getElementById('ocr-run-btn').classList.remove('hidden');
                 document.getElementById('ocr-result-box').classList.add('hidden');
-            }
+            };
             reader.readAsDataURL(file);
         }
 
         function runRealOCRTranslate() {
-            const resultBox = document.getElementById('ocr-result-box');
-            const resultText = document.getElementById('ocr-translated-text');
-            resultBox.classList.remove('hidden');
-            
-            resultText.innerHTML = `
+            document.getElementById('ocr-result-box').classList.remove('hidden');
+            document.getElementById('ocr-translated-text').innerHTML = `
                 <div class="animate-pulse text-rose-500 font-bold mb-1">🔍 正在進行圖片文字辨識...</div>
                 <div><strong>辨識結果：</strong>本日のおすすめ定食（小鉢・お味噌汁付き）</div>
                 <div class="text-slate-600 dark:text-slate-300 mt-1"><strong>即時翻譯：</strong>今日特選定食（附小菜、味噌湯）</div>
-                <div class="text-amber-600 dark:text-amber-400 text-[10px] mt-1.5">💡 價格參考：約 ¥1,200（約合台幣 NT$252）</div>
             `;
         }
 
         async function executeRealTranslate(langFrom, langTo) {
             const input = document.getElementById('translate-input').value.trim();
-            const resBox = document.getElementById('text-translate-result');
-            const resJp = document.getElementById('res-jp');
-            const resRead = document.getElementById('res-read');
-
             if (!input) return alert('請先輸入想翻譯的文字！');
-
+            const resBox = document.getElementById('text-translate-result');
             resBox.classList.remove('hidden');
-            resJp.innerHTML = `<span class="animate-pulse text-blue-500">🌐 正在連線雲端翻譯中...</span>`;
-            resRead.innerText = "";
-
+            document.getElementById('res-jp').innerHTML = `<span class="animate-pulse text-blue-500">🌐 正在連線雲端翻譯中...</span>`;
             try {
-                const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(input)}&langpair=${langFrom}|${langTo}`;
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (data && data.responseData) {
-                    const translatedText = data.responseData.translatedText;
-                    resJp.innerText = translatedText;
-                    resRead.innerText = langTo === 'ja' ? "（已轉為日文）" : "（已轉為中文）";
-                } else {
-                    resJp.innerText = "翻譯發生錯誤，請稍後再試";
-                }
-            } catch (err) {
-                resJp.innerText = input + " (翻譯連線異常，請檢查網路)";
+                const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(input)}&langpair=${langFrom}|${langTo}`);
+                const data = await res.json();
+                document.getElementById('res-jp').innerText = data.responseData ? data.responseData.translatedText : "翻譯失敗";
+                document.getElementById('res-read').innerText = langTo === 'ja' ? "（已轉為日文）" : "（已轉為中文）";
+            } catch (e) {
+                document.getElementById('res-jp').innerText = input + " (連線異常)";
             }
         }
 
-        function quickTranslatePhrase(text) {
-            document.getElementById('translate-input').value = text;
-            executeRealTranslate('zh-CN', 'ja');
-        }
-
-        // 觸覺與音效回饋
+        /* 介面與導覽切換 */
         function triggerVibration() { if (navigator.vibrate) navigator.vibrate(25); }
         function playClickSound() {
             try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(650, audioCtx.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(220, audioCtx.currentTime + 0.04);
-                gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.04);
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(650, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(220, ctx.currentTime + 0.04);
+                gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(); osc.stop(ctx.currentTime + 0.04);
             } catch (e) {}
         }
         function triggerFeedback() { triggerVibration(); playClickSound(); }
@@ -906,140 +701,103 @@
             });
         }
 
-        function toggleHotelMap() {
-            const hotelDetail = document.getElementById('dash-hotel-detail');
-            if (hotelDetail) hotelDetail.classList.toggle('expanded');
-        }
+        function toggleHotelMap() { document.getElementById('dash-hotel-detail').classList.toggle('expanded'); }
 
         function switchTab(tabName) {
-            currentTab = tabName;
             document.querySelectorAll('.tab-page').forEach(el => el.classList.add('hidden'));
             document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-
             document.querySelectorAll('.bottom-nav-btn').forEach(btn => btn.classList.remove('active'));
-            const activeNav = document.getElementById(`nav-${tabName}`);
-            if (activeNav) activeNav.classList.add('active');
-
+            document.getElementById(`nav-${tabName}`).classList.add('active');
             closeDrawer();
 
-            const titles = {
-                dashboard: "日本旅遊總覽",
-                schedule: "每日行程規劃",
-                food: "美食口袋名單",
-                accounting: "旅遊記帳本",
-                translation: "即時翻譯與拍照翻譯",
-                location: "多人即時定位共享",
-                taxi: "計程車叫車指引"
-            };
+            const titles = { dashboard: "日本旅遊總覽", schedule: "每日行程規劃", food: "美食口袋名單", accounting: "旅遊記帳本", translation: "即時翻譯與拍照翻譯", location: "雲端多人即時定位", taxi: "計程車叫車指引" };
             document.getElementById('page-title').innerText = titles[tabName] || "日本旅遊小幫手";
 
             if (tabName === 'location') {
                 setTimeout(() => {
                     initLeafletMap(35.6812, 139.7671);
-                    loadRoomLocations();
+                    const room = document.getElementById('multi-room').value.trim() || 'japan2026';
+                    listenRoomLocations(room);
                 }, 200);
             }
         }
 
         function switchFormType(type) {
-            const schForm = document.getElementById('form-schedule');
-            const foodForm = document.getElementById('form-food');
-            const btnSch = document.getElementById('btn-form-sch');
-            const btnFood = document.getElementById('btn-form-food');
-
             if (type === 'schedule') {
-                schForm.classList.remove('hidden');
-                foodForm.classList.add('hidden');
-                btnSch.className = "cute-btn bg-indigo-300 text-slate-900 px-3 py-1 text-xs";
-                btnFood.className = "cute-btn bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-1 text-xs";
+                document.getElementById('form-schedule').classList.remove('hidden');
+                document.getElementById('form-food').classList.add('hidden');
             } else {
-                schForm.classList.add('hidden');
-                foodForm.classList.remove('hidden');
-                btnFood.className = "cute-btn bg-orange-300 text-slate-900 px-3 py-1 text-xs";
-                btnSch.className = "cute-btn bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-1 text-xs";
+                document.getElementById('form-schedule').classList.add('hidden');
+                document.getElementById('form-food').classList.remove('hidden');
             }
         }
 
-        function toggleFormModal() {
-            document.getElementById('quick-form-drawer').classList.toggle('open');
-        }
+        function toggleFormModal() { document.getElementById('quick-form-drawer').classList.toggle('open'); }
+        function openDrawer(type) { if (type) { switchTab(type); switchFormType(type); } document.getElementById('quick-form-drawer').classList.add('open'); }
+        function closeDrawer() { document.getElementById('quick-form-drawer').classList.remove('open'); }
 
-        function openDrawer(type) {
-            if (type) {
-                switchTab(type);
-                switchFormType(type);
-            }
-            document.getElementById('quick-form-drawer').classList.add('open');
-        }
-
-        function closeDrawer() {
-            document.getElementById('quick-form-drawer').classList.remove('open');
-        }
-
-        /* 渲染行程卡片 */
+        /* 渲染行程與美食 */
         function generateScheduleCardsHTML(prefix) {
             if (schedules.length === 0) return `<div class="text-xs text-slate-400 py-6 text-center font-bold">尚無行程</div>`;
-            return schedules.map((s, idx) => {
-                const encodedTitle = encodeURIComponent(s.title);
-                return `
+            return schedules.map((s, idx) => `
                 <div class="cute-card bg-indigo-200 dark:bg-indigo-950 text-slate-900 dark:text-slate-100 overflow-hidden relative">
                     <div onclick="triggerFeedback(); toggleScheduleMap('${prefix}', ${idx})" class="p-3 cursor-pointer space-y-1">
-                        <div class="flex justify-between items-start">
-                            <span class="text-[10px] font-black bg-white dark:bg-slate-800 text-slate-900 dark:text-white cute-border px-2 py-0.5 rounded-full">${s.day}</span>
-                            <button onclick="event.stopPropagation(); triggerFeedback(); deleteSchedule(${idx})" class="w-6 h-6 rounded-full bg-white dark:bg-slate-800 text-slate-900 dark:text-white cute-border flex items-center justify-center text-[10px] hover:bg-rose-400 transition"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
-                        <h3 class="text-sm font-black tracking-tight">${s.title}</h3>
-                        <p class="text-[10px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1"><i class="fa-solid fa-train text-indigo-700 dark:text-indigo-400"></i>${s.route || '無詳細交通路線'}</p>
+                        <div class="flex justify-between items-start"><span class="text-[10px] font-black bg-white dark:bg-slate-800 cute-border px-2 py-0.5 rounded-full">${s.day}</span></div>
+                        <h3 class="text-sm font-black">${s.title}</h3>
+                        <p class="text-[10px] font-bold text-slate-700 dark:text-slate-300"><i class="fa-solid fa-train"></i>${s.route}</p>
                     </div>
-
-                    <div id="${prefix}-sch-detail-${idx}" class="expandable-content border-t-3 border-slate-800 dark:border-slate-100 bg-white dark:bg-slate-900 p-3 space-y-2">
-                        <div class="flex justify-between items-center text-xs font-black">
-                            <span class="text-indigo-800 dark:text-indigo-300"><i class="fa-solid fa-map-location-dot text-amber-500 mr-1"></i>Google 地圖與路線</span>
-                            <a href="https://www.google.com/maps/search/?api=1&query=${encodedTitle}" target="_blank" class="cute-btn bg-indigo-300 dark:bg-indigo-600 text-slate-900 dark:text-white px-2 py-0.5 text-[10px]">Google 地圖 ↗</a>
-                        </div>
-                        <div class="w-full h-40 rounded-xl overflow-hidden cute-border">
-                            <iframe class="w-full h-full" frameborder="0" style="border:0" src="https://maps.google.com/maps?q=${encodedTitle}&t=&z=14&ie=UTF8&iwloc=&output=embed" allowfullscreen></iframe>
-                        </div>
+                    <div id="${prefix}-sch-detail-${idx}" class="expandable-content border-t-3 border-slate-800 bg-white dark:bg-slate-900 p-3 space-y-2">
+                        <div class="w-full h-40 rounded-xl overflow-hidden cute-border"><iframe class="w-full h-full" frameborder="0" src="https://maps.google.com/maps?q=${encodeURIComponent(s.title)}&t=&z=14&ie=UTF8&iwloc=&output=embed"></iframe></div>
                     </div>
-                </div>
-            `;
-            }).join('');
+                </div>`).join('');
         }
-
         function renderDashboardSchedules() { const c = document.getElementById('dash-schedule-list'); if (c) c.innerHTML = generateScheduleCardsHTML('dash'); }
         function renderFullSchedules() { const c = document.getElementById('full-schedule-list'); if (c) c.innerHTML = generateScheduleCardsHTML('full'); }
-        function toggleScheduleMap(prefix, idx) { const el = document.getElementById(`${prefix}-sch-detail-${idx}`); if (el) el.classList.toggle('expanded'); }
+        function toggleScheduleMap(prefix, idx) { document.getElementById(`${prefix}-sch-detail-${idx}`).classList.toggle('expanded'); }
+
+        function generateFoodCardsHTML(prefix) {
+            if (foods.length === 0) return `<div class="text-xs text-slate-400 py-6 text-center font-bold">尚無美食</div>`;
+            return foods.map((f, idx) => `
+                <div class="cute-card bg-orange-200 dark:bg-orange-950 text-slate-900 dark:text-slate-100 overflow-hidden relative">
+                    <div class="w-full h-32 overflow-hidden cute-border border-b-3 border-slate-800 relative">
+                        <img src="${f.imgUrl || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=600'}" class="w-full h-full object-cover">
+                        <span class="absolute top-2 left-2 text-[10px] font-black bg-white dark:bg-slate-800 cute-border px-2 py-0.5 rounded-full">${f.category}</span>
+                    </div>
+                    <div onclick="triggerFeedback(); toggleFoodMap('${prefix}', ${idx})" class="p-3 cursor-pointer space-y-1">
+                        <h3 class="text-xs font-black">${f.name}</h3>
+                        <p class="text-[10px] font-bold text-slate-700 dark:text-slate-300"><i class="fa-solid fa-location-dot text-rose-500"></i>點擊看地圖與導航</p>
+                    </div>
+                    <div id="${prefix}-food-detail-${idx}" class="expandable-content border-t-3 border-slate-800 bg-white dark:bg-slate-900 p-3 space-y-2">
+                        <div class="w-full h-36 rounded-xl overflow-hidden cute-border"><iframe class="w-full h-full" frameborder="0" src="https://maps.google.com/maps?q=${encodeURIComponent(f.name)}&t=&z=15&ie=UTF8&iwloc=&output=embed"></iframe></div>
+                    </div>
+                </div>`).join('');
+        }
+        function renderDashboardFoods() { const c = document.getElementById('dash-food-list'); if (c) c.innerHTML = generateFoodCardsHTML('dash'); }
+        function renderFullFoods() { const c = document.getElementById('full-food-list'); if (c) c.innerHTML = generateFoodCardsHTML('full'); }
+        function toggleFoodMap(prefix, idx) { document.getElementById(`${prefix}-food-detail-${idx}`).classList.toggle('expanded'); }
 
         function addSchedule() {
             const day = document.getElementById('sch-day').value.trim();
             const title = document.getElementById('sch-title').value.trim();
             const route = document.getElementById('sch-route').value.trim();
             if (!day || !title) return alert('請完整輸入日期與目的地名稱！');
-
             schedules.push({ day, title, route });
             localStorage.setItem('jap_schedules_cute', JSON.stringify(schedules));
-
-            document.getElementById('sch-day').value = '';
-            document.getElementById('sch-title').value = '';
-            document.getElementById('sch-route').value = '';
-
-            closeDrawer();
-            initDaySelector();
-            renderDashboardSchedules();
-            renderFullSchedules();
+            closeDrawer(); initDaySelector(); renderDashboardSchedules(); renderFullSchedules();
         }
 
-        function deleteSchedule(idx) {
-            schedules.splice(idx, 1);
-            localStorage.setItem('jap_schedules_cute', JSON.stringify(schedules));
-            initDaySelector();
-            renderDashboardSchedules();
-            renderFullSchedules();
+        function addFood() {
+            const name = document.getElementById('food-name').value.trim();
+            const category = document.getElementById('food-cat').value.trim() || '美食';
+            const imgUrl = document.getElementById('food-img-url').value.trim();
+            if (!name) return alert('請輸入店名！');
+            foods.push({ name, category, imgUrl });
+            localStorage.setItem('jap_foods_cute', JSON.stringify(foods));
+            closeDrawer(); renderDashboardFoods(); renderFullFoods();
         }
 
-        /* 記帳與計算機邏輯 */
-        let currentCat = "晚餐";
-        let calcInput = "";
+        /* 記帳與計算機 */
+        let currentCat = "晚餐"; let calcInput = "";
         function selectAccCategory(catName, iconClass) {
             currentCat = catName;
             document.getElementById('acc-curr-cat-name').innerText = catName;
@@ -1049,77 +807,53 @@
             if (key === 'AC') calcInput = "";
             else if (key === 'DEL') calcInput = calcInput.slice(0, -1);
             else { if (calcInput.length < 9) calcInput += key; }
-            updateCalcDisplay();
-        }
-        function updateCalcDisplay() {
             const jpy = parseFloat(calcInput) || 0;
-            const twd = Math.round(jpy * exchangeRate);
             document.getElementById('acc-display-val').innerText = `¥ ${jpy.toLocaleString()}`;
-            document.getElementById('acc-twd-val').innerText = `≈ NT$ ${twd.toLocaleString()}`;
+            document.getElementById('acc-twd-val').innerText = `≈ NT$ ${Math.round(jpy * exchangeRate).toLocaleString()}`;
         }
         function saveExpenseRecord() {
             const amount = parseFloat(calcInput);
-            if (!amount || amount <= 0) return alert('請輸入消費金額！');
-            const twd = Math.round(amount * exchangeRate);
-            expenseRecords.push({ cat: currentCat, amount, twd, date: "10/25" });
+            if (!amount || amount <= 0) return alert('請輸入金額！');
+            expenseRecords.push({ cat: currentCat, amount, twd: Math.round(amount * exchangeRate), date: "10/25" });
             localStorage.setItem('jap_expenses_cute', JSON.stringify(expenseRecords));
-            calcInput = "";
-            updateCalcDisplay();
-            renderExpenseRecords();
-            updateChart();
+            calcInput = ""; pressKey(''); renderExpenseRecords(); updateChart();
         }
         function renderExpenseRecords() {
+            let sumJpy = 0, sumTwd = 0;
             const container = document.getElementById('acc-record-list');
             if (!container) return;
-            let sumJpy = 0, sumTwd = 0;
-            if (expenseRecords.length === 0) {
-                container.innerHTML = `<div class="text-[10px] text-slate-400 py-2 text-center font-bold">尚無消費紀錄</div>`;
-            } else {
-                container.innerHTML = expenseRecords.map((r, idx) => {
-                    sumJpy += r.amount; sumTwd += r.twd;
-                    return `
-                        <div class="flex justify-between items-center p-2 bg-amber-50 dark:bg-slate-900 cute-border rounded-lg text-[10px] font-bold text-slate-900 dark:text-white">
-                            <div class="flex items-center gap-1.5"><span class="bg-white dark:bg-slate-800 cute-border px-1.5 py-0.2 rounded text-[9px]">${r.cat}</span><span>${r.date}</span></div>
-                            <div class="flex items-center gap-2">
-                                <div><span class="text-orange-600 dark:text-orange-400 block font-black">¥${r.amount.toLocaleString()}</span></div>
-                                <button onclick="triggerFeedback(); deleteExpense(${idx})" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark"></i></button>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
+            container.innerHTML = expenseRecords.map((r, idx) => {
+                sumJpy += r.amount; sumTwd += r.twd;
+                return `<div class="flex justify-between items-center p-2 bg-amber-50 dark:bg-slate-900 cute-border rounded-lg text-[10px] font-bold">
+                    <span>${r.cat} - ¥${r.amount.toLocaleString()}</span>
+                    <button onclick="triggerFeedback(); expenseRecords.splice(${idx},1); localStorage.setItem('jap_expenses_cute', JSON.stringify(expenseRecords)); renderExpenseRecords(); updateChart();"><i class="fa-solid fa-xmark"></i></button>
+                </div>`;
+            }).join('') || `<div class="text-[10px] text-slate-400 py-2 text-center font-bold">尚無消費紀錄</div>`;
             document.getElementById('acc-sum-jpy').innerText = `¥${sumJpy.toLocaleString()}`;
             document.getElementById('acc-sum-twd').innerText = `NT$ ${sumTwd.toLocaleString()}`;
-            const dashJpy = document.getElementById('dash-total-jpy');
-            const dashTwd = document.getElementById('dash-total-twd');
-            if (dashJpy) dashJpy.innerText = `¥${sumJpy.toLocaleString()}`;
-            if (dashTwd) dashTwd.innerText = `NT$ ${sumTwd.toLocaleString()}`;
+            document.getElementById('dash-total-jpy').innerText = `¥${sumJpy.toLocaleString()}`;
+            document.getElementById('dash-total-twd').innerText = `NT$ ${sumTwd.toLocaleString()}`;
         }
-        function deleteExpense(idx) {
-            expenseRecords.splice(idx, 1);
-            localStorage.setItem('jap_expenses_cute', JSON.stringify(expenseRecords));
-            renderExpenseRecords();
-            updateChart();
-        }
-
         function initChart() {
             const ctx = document.getElementById('expenseChart')?.getContext('2d');
             if (!ctx) return;
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
-                data: getChartData(),
+                data: {
+                    labels: ['晚餐', '交通', '購物'],
+                    datasets: [{ data: [3500, 800, 0], backgroundColor: ['#f87171', '#34d399', '#60a5fa'], borderWidth: 2.5, borderColor: '#1e293b' }]
+                },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }
-        function getChartData() {
+        function updateChart() {
+            if (!chartInstance) return;
             const totals = {};
-            expenseRecords.forEach(r => { totals[r.cat] = (totals[r.cat] || 0) + r.amount; });
-            return {
-                labels: Object.keys(totals),
-                datasets: [{ data: Object.values(totals), backgroundColor: ['#f87171', '#fb923c', '#fbbf24', '#34d399', '#60a5fa', '#c084fc'], borderWidth: 2.5, borderColor: '#1e293b' }]
-            };
+            expenseRecords.forEach(r => totals[r.cat] = (totals[r.cat] || 0) + r.amount);
+            chartInstance.data.labels = Object.keys(totals);
+            chartInstance.data.datasets[0].data = Object.values(totals);
+            chartInstance.update();
         }
-        function updateChart() { if (chartInstance) { chartInstance.data = getChartData(); chartInstance.update(); } }
     </script>
 </body>
 </html>
