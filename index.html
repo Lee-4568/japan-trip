@@ -37,6 +37,11 @@
             background: #fef08a;
             transition: background-color 0.3s ease, color 0.3s ease;
             -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
         .dark body {
             background: #0f172a;
@@ -139,9 +144,9 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex justify-center text-slate-800 dark:text-slate-100 sm:p-4">
+<body class="min-h-screen flex justify-center items-center text-slate-800 dark:text-slate-100 p-0 sm:p-4">
 
-    <!-- 主容器 -->
+    <!-- 單一主容器 -->
     <div class="w-full max-w-md sm:max-w-lg main-container-bg sm:rounded-[32px] sm:cute-border sm:shadow-[8px_10px_0px_#1e293b] dark:sm:shadow-[8px_10px_0px_#334155] overflow-hidden flex flex-col h-screen sm:h-[92vh] relative">
 
         <!-- 頂部標頭 Header -->
@@ -744,7 +749,6 @@
                     const lng = pos.coords.longitude;
                     const timestamp = new Date().toLocaleTimeString();
 
-                    // 儲存至全域公用 LocalStorage 模擬雲端資料池 (key 格式: room_房號)
                     let roomKey = `jap_room_${room}`;
                     let roomData = JSON.parse(localStorage.getItem(roomKey)) || {};
                     
@@ -769,7 +773,7 @@
             let roomData = JSON.parse(localStorage.getItem(roomKey)) || {};
 
             if (!leafMap) {
-                initLeafletMap(35.6812, 139.7671); // 預設東京車站
+                initLeafletMap(35.6812, 139.7671);
             }
 
             if (markersGroup) markersGroup.clearLayers();
@@ -781,7 +785,6 @@
                 let user = roomData[userName];
                 count++;
                 
-                // 加上地圖標記
                 let marker = L.marker([user.lat, user.lng]).bindPopup(`<b>👤 ${userName}</b><br>更新時間: ${user.timestamp}`);
                 markersGroup.addLayer(marker);
 
@@ -1105,7 +1108,7 @@
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: getChartData(),
-                options: { responsive: andMaintainAspectRatio = false, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }
         function getChartData() {
