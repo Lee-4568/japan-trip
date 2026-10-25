@@ -2,12 +2,12 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🇯🇵 日本自由行 & 手繪風記帳與翻譯小幫手</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>🇯🇵 日本自由行 & 手繪風記帳、美食照片與翻譯小幫手</title>
     <!-- Tailwind CSS & FontAwesome Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js for Donut Charts -->
+    <!-- Chart.js for Expense Donut Chart -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
@@ -31,85 +31,82 @@
         
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: url('https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=1600&auto=format&fit=crop') no-repeat center center fixed;
-            background-size: cover;
+            background: #fef08a;
             transition: background-color 0.3s ease, color 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .dark body {
+            background: #0f172a;
         }
 
         .main-container-bg {
-            background-color: rgba(254, 252, 232, 0.95);
+            background-color: rgba(254, 252, 232, 0.98);
         }
         .dark .main-container-bg {
-            background-color: rgba(15, 23, 42, 0.96);
+            background-color: rgba(15, 23, 42, 0.98);
         }
 
         .cute-border {
-            border: 3.5px solid #1e293b;
+            border: 3px solid #1e293b;
         }
         .dark .cute-border {
-            border: 3.5px solid #f8fafc;
+            border: 3px solid #f8fafc;
         }
 
         .cute-card {
-            border: 3.5px solid #1e293b;
-            box-shadow: 4px 5px 0px #1e293b;
-            border-radius: 24px;
+            border: 3px solid #1e293b;
+            box-shadow: 3px 4px 0px #1e293b;
+            border-radius: 20px;
             transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.3s ease;
         }
         .dark .cute-card {
-            border: 3.5px solid #f8fafc;
-            box-shadow: 4px 5px 0px #334155;
+            border: 3px solid #f8fafc;
+            box-shadow: 3px 4px 0px #334155;
         }
-        .cute-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 6px 7px 0px #1e293b;
-        }
-        .dark .cute-card:hover {
-            box-shadow: 6px 7px 0px #475569;
+        .cute-card:active {
+            transform: translateY(1px);
+            box-shadow: 2px 2px 0px #1e293b;
         }
 
         .cute-btn {
-            border: 3px solid #1e293b;
-            box-shadow: 3px 4px 0px #1e293b;
-            border-radius: 18px;
+            border: 2.5px solid #1e293b;
+            box-shadow: 2.5px 3px 0px #1e293b;
+            border-radius: 16px;
             font-weight: 800;
             transition: all 0.1s ease;
         }
         .dark .cute-btn {
-            border: 3px solid #f8fafc;
-            box-shadow: 3px 4px 0px #334155;
+            border: 2.5px solid #f8fafc;
+            box-shadow: 2.5px 3px 0px #334155;
         }
         .cute-btn:active {
             transform: translate(2px, 2px);
-            box-shadow: 1px 2px 0px #1e293b;
+            box-shadow: 1px 1px 0px #1e293b;
         }
 
-        .top-nav-btn {
-            padding: 8px 14px;
-            border-radius: 16px;
+        /* 手機 App 底部導覽列按鈕 */
+        .bottom-nav-btn {
+            flex: 1;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 6px;
-            font-weight: 900;
-            font-size: 12px;
-            border: 3px solid #1e293b;
-            box-shadow: 2px 3px 0px #1e293b;
-            background: #ffffff;
-            color: #1e293b;
+            justify-content: center;
+            padding: 6px 2px;
+            font-weight: 800;
+            font-size: 10px;
+            color: #64748b;
             transition: all 0.15s ease;
-            white-space: nowrap;
         }
-        .dark .top-nav-btn {
-            border: 3.5px solid #f8fafc;
-            box-shadow: 2px 3px 0px #334155;
-            background: #1e293b;
-            color: #f8fafc;
+        .dark .bottom-nav-btn {
+            color: #94a3b8;
         }
-        .top-nav-btn.active {
-            background: #fde047;
-            color: #1e293b;
-            transform: translate(1px, 2px);
-            box-shadow: 1px 1px 0px #1e293b;
+        .bottom-nav-btn.active {
+            color: #0284c7;
+            font-weight: 900;
+            transform: translateY(-2px);
+        }
+        .dark .bottom-nav-btn.active {
+            color: #38bdf8;
         }
 
         .expandable-content {
@@ -119,7 +116,7 @@
             opacity: 0;
         }
         .expandable-content.expanded {
-            max-height: 700px;
+            max-height: 600px;
             opacity: 1;
         }
 
@@ -135,373 +132,359 @@
         }
     </style>
 </head>
-<body class="p-2 sm:p-4 md:p-6 min-h-screen flex items-center justify-center text-slate-800 dark:text-slate-100">
+<body class="min-h-screen flex justify-center text-slate-800 dark:text-slate-100 sm:p-4">
 
-    <div class="w-full max-w-[1400px] main-container-bg rounded-[32px] cute-border shadow-[8px_10px_0px_#1e293b] dark:shadow-[8px_10px_0px_#334155] overflow-hidden flex flex-col min-h-[90vh]">
+    <!-- 主容器 -->
+    <div class="w-full max-w-md sm:max-w-lg main-container-bg sm:rounded-[32px] sm:cute-border sm:shadow-[8px_10px_0px_#1e293b] dark:sm:shadow-[8px_10px_0px_#334155] overflow-hidden flex flex-col h-screen sm:h-[92vh] relative">
 
-        <!-- 頂部導覽列 -->
-        <header class="p-4 sm:p-6 bg-white/90 dark:bg-[#1e293b]/90 backdrop-blur-md border-b-4 border-slate-800 dark:border-slate-100 sticky top-0 z-20 space-y-4">
-            
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 bg-amber-300 dark:bg-amber-400 cute-border text-slate-900 rounded-2xl flex items-center justify-center text-xl font-black shadow-[2px_3px_0px_#1e293b] shrink-0">
+        <!-- 頂部標頭 Header -->
+        <header class="p-3.5 bg-white/95 dark:bg-[#1e293b]/95 backdrop-blur-md border-b-3 border-slate-800 dark:border-slate-100 sticky top-0 z-20 space-y-2 shrink-0">
+            <div class="flex justify-between items-center gap-2">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 bg-amber-300 dark:bg-amber-400 cute-border text-slate-900 rounded-xl flex items-center justify-center text-sm font-black shadow-[1.5px_2px_0px_#1e293b] shrink-0">
                         JP
                     </div>
                     <div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-black text-slate-800 uppercase bg-amber-200 cute-border px-3 py-0.5 rounded-full shadow-[2px_2px_0px_#1e293b]">JAPAN TRIP 2026</span>
-                            <span class="text-xs font-bold text-slate-500 dark:text-slate-400">東京 • 淺草 • 秋葉原</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[9px] font-black text-slate-800 uppercase bg-amber-200 cute-border px-2 py-0.2 rounded-full">TRIP 2026</span>
+                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400">東京自由行</span>
                         </div>
-                        <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5" id="page-title">日本旅遊綜合儀表板</h1>
+                        <h1 class="text-base font-black text-slate-900 dark:text-white tracking-tight mt-0.5 leading-none" id="page-title">日本旅遊小幫手</h1>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
-                    <button onclick="triggerFeedback(); toggleDarkMode()" class="cute-btn bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-yellow-400 px-3.5 py-2 text-xs flex items-center gap-1.5" title="切換夜間模式">
-                        <i id="dark-mode-icon" class="fa-solid fa-moon text-sm"></i> <span id="dark-mode-text" class="hidden sm:inline">夜間</span>
+                <div class="flex items-center gap-1.5">
+                    <button onclick="triggerFeedback(); toggleDarkMode()" class="cute-btn bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-yellow-400 px-2.5 py-1.5 text-xs" title="切換夜間模式">
+                        <i id="dark-mode-icon" class="fa-solid fa-moon"></i>
                     </button>
-                    <button onclick="triggerFeedback(); toggleFormModal()" class="cute-btn bg-amber-300 hover:bg-amber-400 text-slate-900 px-4 py-2 text-xs flex items-center gap-1.5 shrink-0">
-                        <i class="fa-solid fa-plus"></i> 新增行程
+                    <button onclick="triggerFeedback(); toggleFormModal()" class="cute-btn bg-amber-300 hover:bg-amber-400 text-slate-900 px-3 py-1.5 text-xs flex items-center gap-1 shrink-0 font-black">
+                        <i class="fa-solid fa-plus text-[10px]"></i> 新增
                     </button>
                 </div>
             </div>
-
-            <!-- 頂部頁籤選單 -->
-            <nav class="flex items-center gap-2 overflow-x-auto pt-2 pb-1">
-                <button onclick="triggerFeedback(); switchTab('dashboard')" id="nav-dashboard" class="top-nav-btn active">
-                    <i class="fa-solid fa-chart-pie text-base"></i> 總覽
-                </button>
-                <button onclick="triggerFeedback(); switchTab('schedule')" id="nav-schedule" class="top-nav-btn">
-                    <i class="fa-solid fa-calendar-days text-base"></i> 詳細行程
-                </button>
-                <button onclick="triggerFeedback(); switchTab('food')" id="nav-food" class="top-nav-btn">
-                    <i class="fa-solid fa-utensils text-base"></i> 美食
-                </button>
-                <button onclick="triggerFeedback(); switchTab('accounting')" id="nav-accounting" class="top-nav-btn">
-                    <i class="fa-solid fa-calculator text-base"></i> 記帳
-                </button>
-                <button onclick="triggerFeedback(); switchTab('translation')" id="nav-translation" class="top-nav-btn">
-                    <i class="fa-solid fa-language text-base text-rose-500"></i> 即時翻譯
-                </button>
-                <button onclick="triggerFeedback(); switchTab('taxi')" id="nav-taxi" class="top-nav-btn">
-                    <i class="fa-solid fa-taxi text-base"></i> 叫車
-                </button>
-            </nav>
         </header>
 
         <!-- 隱藏新增 Drawer -->
-        <div id="quick-form-drawer" class="collapsible bg-amber-50/95 dark:bg-[#172033]/95 border-b-4 border-slate-800 dark:border-slate-100 px-6 py-4">
-            <div class="max-w-4xl mx-auto">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-xs font-black text-slate-800 dark:text-amber-300 uppercase tracking-wider" id="drawer-form-title">發布每日行程</h3>
+        <div id="quick-form-drawer" class="collapsible bg-amber-50/98 dark:bg-[#172033]/98 border-b-3 border-slate-800 dark:border-slate-100 px-4 py-3 shrink-0">
+            <div class="space-y-2.5">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-black text-slate-800 dark:text-amber-300 uppercase tracking-wider" id="drawer-form-title">新增行程或美食</h3>
                     <button onclick="triggerFeedback(); closeDrawer()" class="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800"><i class="fa-solid fa-xmark"></i> 關閉</button>
                 </div>
 
-                <div id="form-schedule" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                    <input type="text" id="sch-day" placeholder="日期 (例: Day 4 - 10/28)" class="p-2.5 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white">
-                    <input type="text" id="sch-title" placeholder="景點 (例: 淺草寺 ➔ 秋葉原)" class="p-2.5 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white">
-                    <input type="text" id="sch-route" placeholder="乘車指引 (例: 搭銀座線轉JR山手線)" class="p-2.5 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white">
-                    <button onclick="triggerFeedback(); addSchedule()" class="cute-btn bg-indigo-400 hover:bg-indigo-500 text-white font-black text-xs py-2.5">新增行程</button>
+                <div class="flex gap-2">
+                    <button onclick="triggerFeedback(); switchFormType('schedule')" id="btn-form-sch" class="cute-btn bg-indigo-300 text-slate-900 px-3 py-1 text-xs">新增行程</button>
+                    <button onclick="triggerFeedback(); switchFormType('food')" id="btn-form-food" class="cute-btn bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-1 text-xs">新增美食</button>
+                </div>
+
+                <!-- 行程表單 -->
+                <div id="form-schedule" class="space-y-2">
+                    <input type="text" id="sch-day" placeholder="日期 (例: Day 4 - 10/28)" class="w-full p-2 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white">
+                    <input type="text" id="sch-title" placeholder="景點 (例: 淺草寺 ➔ 秋葉原)" class="w-full p-2 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white">
+                    <input type="text" id="sch-route" placeholder="乘車指引 (例: 搭銀座線轉JR山手線)" class="w-full p-2 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white">
+                    <button onclick="triggerFeedback(); addSchedule()" class="cute-btn bg-indigo-400 hover:bg-indigo-500 text-white w-full font-black text-xs py-2">新增行程</button>
+                </div>
+
+                <!-- 美食表單 (支援貼上 Google Map 網址與自訂照片) -->
+                <div id="form-food" class="space-y-2 hidden">
+                    <input type="text" id="food-name" placeholder="店名 (例: 一蘭拉麵 淺草店 或貼上完整分享名稱)" class="w-full p-2 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white">
+                    <input type="text" id="food-cat" placeholder="分類 (例: 拉麵 / 燒肉 / 甜點 / 壽司)" class="w-full p-2 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white">
+                    <input type="text" id="food-map-url" onchange="autoParseMapUrl(this.value)" placeholder="貼上 Google Maps 分享網址 (選填)" class="w-full p-2 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white">
+                    <input type="text" id="food-img-url" placeholder="自訂店家/美食照片 URL (選填，留空自動匹配圖片)" class="w-full p-2 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white">
+                    <button onclick="triggerFeedback(); addFood()" class="cute-btn bg-orange-400 hover:bg-orange-500 text-white w-full font-black text-xs py-2">新增美食</button>
                 </div>
             </div>
         </div>
 
-        <!-- 內容區 -->
-        <div class="p-4 sm:p-6 space-y-6 overflow-y-auto flex-1">
+        <!-- 內容區 Scrollable Content -->
+        <div class="p-3.5 space-y-4 overflow-y-auto flex-1 pb-20">
 
             <!-- TAB 1: DASHBOARD -->
-            <div id="tab-dashboard" class="tab-page space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="cute-card bg-emerald-200 dark:bg-emerald-950 text-slate-900 dark:text-slate-100 p-4 flex flex-col justify-between min-h-[100px]">
+            <div id="tab-dashboard" class="tab-page space-y-4">
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div class="cute-card bg-emerald-200 dark:bg-emerald-950 text-slate-900 dark:text-slate-100 p-3 flex flex-col justify-between">
                         <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-[9px] font-black uppercase tracking-widest bg-white dark:bg-slate-800 cute-border px-2 py-0.5 rounded-full text-slate-900 dark:text-white">TOTAL EXPENSES</span>
-                                <h3 class="text-sm font-black tracking-tight mt-1">💰 本次累積總花費</h3>
-                            </div>
-                            <div class="w-7 h-7 rounded-xl bg-white dark:bg-slate-800 cute-border flex items-center justify-center text-slate-900 dark:text-white text-xs font-black"><i class="fa-solid fa-coins"></i></div>
+                            <span class="text-[8px] font-black uppercase tracking-widest bg-white dark:bg-slate-800 cute-border px-1.5 py-0.5 rounded-full">EXPENSES</span>
+                            <i class="fa-solid fa-coins text-xs"></i>
                         </div>
-                        <div class="flex justify-between items-baseline pt-2 border-t-2 border-slate-800/20 dark:border-slate-200/20">
-                            <div><span class="text-[11px] font-bold text-slate-600 dark:text-slate-300">日幣: <strong class="text-orange-600 dark:text-orange-400 text-base" id="dash-total-jpy">¥0</strong></span></div>
-                            <div class="text-right"><span class="text-[11px] font-bold text-slate-600 dark:text-slate-300">台幣: <strong class="text-emerald-700 dark:text-emerald-400 text-sm" id="dash-total-twd">NT$ 0</strong></span></div>
+                        <div class="pt-2 border-t border-slate-800/20 dark:border-slate-200/20">
+                            <div class="text-[10px] font-bold text-slate-600 dark:text-slate-300">日幣: <strong class="text-orange-600 dark:text-orange-400 text-xs" id="dash-total-jpy">¥0</strong></div>
+                            <div class="text-[10px] font-bold text-slate-600 dark:text-slate-300">台幣: <strong class="text-emerald-700 dark:text-emerald-400 text-xs" id="dash-total-twd">NT$0</strong></div>
                         </div>
                     </div>
 
-                    <div class="cute-card bg-sky-200 dark:bg-sky-950 text-slate-900 dark:text-slate-100 p-4 flex flex-col justify-between min-h-[100px]">
+                    <div class="cute-card bg-sky-200 dark:bg-sky-950 text-slate-900 dark:text-slate-100 p-3 flex flex-col justify-between">
                         <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-[9px] font-black uppercase tracking-widest bg-white dark:bg-slate-800 cute-border px-2 py-0.5 rounded-full text-slate-900 dark:text-white">EXCHANGE RATE</span>
-                                <h3 class="text-sm font-black tracking-tight mt-1">💴 日幣匯率參考</h3>
-                            </div>
-                            <div class="w-7 h-7 rounded-xl bg-white dark:bg-slate-800 cute-border flex items-center justify-center text-slate-900 dark:text-white text-xs font-black"><i class="fa-solid fa-calculator"></i></div>
+                            <span class="text-[8px] font-black uppercase tracking-widest bg-white dark:bg-slate-800 cute-border px-1.5 py-0.5 rounded-full">RATE</span>
+                            <i class="fa-solid fa-calculator text-xs"></i>
                         </div>
-                        <div class="flex justify-between items-center pt-2 border-t-2 border-slate-800/20 dark:border-slate-200/20 text-xs font-black">
-                            <span>1 JPY ≈ 0.21 TWD</span>
-                            <span class="bg-white dark:bg-slate-800 px-2 py-0.5 rounded-lg cute-border text-emerald-600 dark:text-emerald-400 text-[11px]">¥1,000 = NT$210</span>
+                        <div class="pt-2 border-t border-slate-800/20 dark:border-slate-200/20 text-[10px] font-black">
+                            <div>1 JPY ≈ 0.21 TWD</div>
+                            <div class="text-emerald-600 dark:text-emerald-400 text-[9px] mt-0.5">¥1,000 = NT$210</div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="cute-card bg-purple-200 dark:bg-purple-950 text-slate-900 dark:text-slate-100 overflow-hidden relative min-h-[100px] flex flex-col justify-between">
-                        <div onclick="triggerFeedback(); toggleHotelMap()" class="p-4 cursor-pointer relative z-10 space-y-1">
-                            <div class="flex justify-between items-start">
-                                <span class="text-[9px] font-black uppercase tracking-widest bg-white dark:bg-slate-800 cute-border px-2 py-0.5 rounded-full text-slate-900 dark:text-white">今晚住宿 (點擊展開地圖)</span>
-                                <div class="w-7 h-7 rounded-xl bg-white dark:bg-slate-800 cute-border flex items-center justify-center text-slate-900 dark:text-white text-xs font-black"><i class="fa-solid fa-hotel"></i></div>
-                            </div>
-                            <div>
-                                <h3 class="text-xs font-black tracking-tight truncate">Hostel Inn Tokyo Asakusa Annex</h3>
-                                <p class="text-[10px] font-bold text-slate-700 dark:text-slate-300">東京淺草 Annex 飯店與周邊</p>
-                            </div>
+                <!-- 今晚住宿 -->
+                <div class="cute-card bg-purple-200 dark:bg-purple-950 text-slate-900 dark:text-slate-100 overflow-hidden relative">
+                    <div onclick="triggerFeedback(); toggleHotelMap()" class="p-3 cursor-pointer space-y-1">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[9px] font-black uppercase bg-white dark:bg-slate-800 cute-border px-2 py-0.5 rounded-full">今晚住宿 (點擊看地圖)</span>
+                            <i class="fa-solid fa-hotel text-xs"></i>
                         </div>
+                        <h3 class="text-xs font-black truncate">Hostel Inn Tokyo Asakusa Annex</h3>
+                    </div>
 
-                        <div id="dash-hotel-detail" class="expandable-content border-t-4 border-slate-800 dark:border-slate-100 bg-white dark:bg-slate-900 p-4 space-y-3">
-                            <div class="flex justify-between items-center text-xs font-black">
-                                <span class="text-purple-800 dark:text-purple-300"><i class="fa-solid fa-map-location-dot text-amber-500 mr-1.5"></i>飯店位置與實景</span>
-                                <a href="https://www.google.com/maps/search/?api=1&query=Hostel+Inn+Tokyo+Asakusa+Annex" target="_blank" class="cute-btn bg-purple-300 dark:bg-purple-600 text-slate-900 dark:text-white px-3 py-1 text-xs">全螢幕開啟 ↗</a>
-                            </div>
-                            <div class="w-full h-48 rounded-xl overflow-hidden cute-border">
-                                <iframe class="w-full h-full" frameborder="0" style="border:0" src="https://maps.google.com/maps?q=Hostel+Inn+Tokyo+Asakusa+Annex&t=&z=15&ie=UTF8&iwloc=&output=embed" allowfullscreen></iframe>
-                            </div>
+                    <div id="dash-hotel-detail" class="expandable-content border-t-3 border-slate-800 dark:border-slate-100 bg-white dark:bg-slate-900 p-3 space-y-2">
+                        <div class="flex justify-between items-center text-xs font-black">
+                            <span class="text-purple-800 dark:text-purple-300"><i class="fa-solid fa-map-location-dot text-amber-500 mr-1"></i>飯店位置與實景</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Hostel+Inn+Tokyo+Asakusa+Annex" target="_blank" class="cute-btn bg-purple-300 dark:bg-purple-600 text-slate-900 dark:text-white px-2 py-0.5 text-[10px]">Google 地圖 ↗</a>
+                        </div>
+                        <div class="w-full h-36 rounded-xl overflow-hidden cute-border">
+                            <iframe class="w-full h-full" frameborder="0" style="border:0" src="https://maps.google.com/maps?q=Hostel+Inn+Tokyo+Asakusa+Annex&t=&z=15&ie=UTF8&iwloc=&output=embed" allowfullscreen></iframe>
                         </div>
                     </div>
                 </div>
 
                 <!-- 今日焦點 -->
-                <div class="cute-card bg-amber-200 dark:bg-amber-950 text-slate-900 dark:text-slate-100 p-5 space-y-3">
+                <div class="cute-card bg-amber-200 dark:bg-amber-950 text-slate-900 dark:text-slate-100 p-3.5 space-y-2.5">
                     <div class="flex justify-between items-center">
-                        <span class="text-xs font-black bg-white dark:bg-slate-800 text-slate-900 dark:text-white cute-border px-3 py-1 rounded-full shadow-[2px_2px_0px_#1e293b]" id="daily-highlight-badge">⭐ 今日焦點行程與交通路線</span>
-                        <div class="flex items-center gap-2">
-                            <select id="day-selector" onchange="triggerFeedback(); changeFeaturedDay(this.value)" class="bg-white dark:bg-slate-800 text-xs font-black cute-border px-2 py-1 rounded-xl outline-none cursor-pointer"></select>
-                            <div class="w-8 h-8 rounded-full bg-white dark:bg-slate-800 text-slate-900 dark:text-white cute-border flex items-center justify-center text-sm font-black">
-                                <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
-                            </div>
-                        </div>
+                        <span class="text-[10px] font-black bg-white dark:bg-slate-800 cute-border px-2.5 py-0.5 rounded-full" id="daily-highlight-badge">⭐ 今日焦點行程</span>
+                        <select id="day-selector" onchange="triggerFeedback(); changeFeaturedDay(this.value)" class="bg-white dark:bg-slate-800 text-[10px] font-black cute-border px-1.5 py-0.5 rounded-lg outline-none cursor-pointer"></select>
                     </div>
-                    <div id="featured-highlight-content" class="space-y-3 pt-1"></div>
+                    <div id="featured-highlight-content" class="space-y-2 pt-0.5"></div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <h2 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                                <i class="fa-solid fa-person-walking-luggage text-indigo-600 dark:text-indigo-400"></i> 行程動態規劃 (點擊可展開地圖)
-                            </h2>
-                            <button onclick="triggerFeedback(); openDrawer('schedule')" class="cute-btn bg-indigo-300 dark:bg-indigo-600 text-slate-900 dark:text-white text-xs px-3 py-1.5 flex items-center gap-1">
-                                <i class="fa-solid fa-plus text-[10px]"></i> 新增
-                            </button>
-                        </div>
-                        <div id="dash-schedule-list" class="space-y-4"></div>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                            <i class="fa-solid fa-person-walking-luggage text-indigo-600 dark:text-indigo-400"></i> 行程動態 (點擊展開地圖)
+                        </h2>
                     </div>
+                    <div id="dash-schedule-list" class="space-y-3"></div>
+                </div>
 
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <h2 class="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                                <i class="fa-solid fa-utensils text-orange-600 dark:text-orange-400"></i> 美食口袋名單
-                            </h2>
-                        </div>
-                        <div id="dash-food-list" class="space-y-4"></div>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                            <i class="fa-solid fa-utensils text-orange-600 dark:text-orange-400"></i> 美食名單 (照片與即時地圖)
+                        </h2>
+                        <button onclick="triggerFeedback(); openDrawer('food')" class="cute-btn bg-orange-300 dark:bg-orange-600 text-slate-900 dark:text-white text-[10px] px-2.5 py-1">
+                            <i class="fa-solid fa-plus mr-1"></i>新增美食
+                        </button>
                     </div>
+                    <div id="dash-food-list" class="space-y-3"></div>
                 </div>
             </div>
 
             <!-- TAB 2: SCHEDULE -->
-            <div id="tab-schedule" class="tab-page hidden space-y-6">
+            <div id="tab-schedule" class="tab-page hidden space-y-3">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-lg font-black text-slate-900 dark:text-white">🗓️ 每日行程清單</h2>
-                    <button onclick="triggerFeedback(); openDrawer('schedule')" class="cute-btn bg-indigo-300 dark:bg-indigo-600 text-slate-900 dark:text-white text-xs px-4 py-2"><i class="fa-solid fa-plus mr-1"></i>新增行程</button>
+                    <h2 class="text-sm font-black text-slate-900 dark:text-white">🗓️ 每日行程清單</h2>
+                    <button onclick="triggerFeedback(); openDrawer('schedule')" class="cute-btn bg-indigo-300 dark:bg-indigo-600 text-slate-900 dark:text-white text-xs px-3 py-1"><i class="fa-solid fa-plus mr-1"></i>新增</button>
                 </div>
-                <div id="full-schedule-list" class="space-y-4"></div>
+                <div id="full-schedule-list" class="space-y-3"></div>
             </div>
 
             <!-- TAB 3: FOOD -->
-            <div id="tab-food" class="tab-page hidden space-y-6">
+            <div id="tab-food" class="tab-page hidden space-y-3">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-lg font-black text-slate-900 dark:text-white">🍜 美食口袋名單</h2>
+                    <h2 class="text-sm font-black text-slate-900 dark:text-white">🍜 美食店家照片與地圖</h2>
+                    <button onclick="triggerFeedback(); openDrawer('food')" class="cute-btn bg-orange-300 dark:bg-orange-600 text-slate-900 dark:text-white text-xs px-3 py-1"><i class="fa-solid fa-plus mr-1"></i>新增美食</button>
                 </div>
-                <div id="full-food-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+                <div id="full-food-list" class="space-y-3"></div>
             </div>
 
             <!-- TAB 4: ACCOUNTING -->
-            <div id="tab-accounting" class="tab-page hidden space-y-6">
-                <div class="cute-card bg-white dark:bg-slate-800 p-5 space-y-4">
-                    <div class="flex justify-between items-center border-b-2 border-slate-100 dark:border-slate-700 pb-3">
-                        <h3 class="font-black text-base text-slate-900 dark:text-white flex items-center gap-2">
-                            <i class="fa-solid fa-chart-pie text-amber-500"></i> 📊 消費分類比例
+            <div id="tab-accounting" class="tab-page hidden space-y-3">
+                <div class="cute-card bg-white dark:bg-slate-800 p-3.5 space-y-3">
+                    <div class="flex justify-between items-center border-b-2 border-slate-100 dark:border-slate-700 pb-2">
+                        <h3 class="font-black text-xs text-slate-900 dark:text-white flex items-center gap-1">
+                            <i class="fa-solid fa-chart-pie text-amber-500"></i> 📊 消費分類
                         </h3>
-                        <div class="flex items-center gap-4 text-xs font-black">
-                            <span class="bg-amber-100 dark:bg-amber-950 px-3 py-1 rounded-full cute-border text-slate-900 dark:text-white">總日幣: <strong class="text-orange-600 dark:text-orange-400" id="acc-sum-jpy">¥0</strong></span>
-                            <span class="bg-emerald-100 dark:bg-emerald-950 px-3 py-1 rounded-full cute-border text-slate-900 dark:text-white">總台幣: <strong class="text-emerald-600 dark:text-emerald-400" id="acc-sum-twd">NT$0</strong></span>
+                        <div class="flex items-center gap-2 text-[10px] font-black">
+                            <span class="bg-amber-100 dark:bg-amber-950 px-2 py-0.5 rounded-full cute-border">日幣: <strong class="text-orange-600" id="acc-sum-jpy">¥0</strong></span>
+                            <span class="bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 rounded-full cute-border">台幣: <strong class="text-emerald-600" id="acc-sum-twd">NT$0</strong></span>
                         </div>
                     </div>
 
-                    <div class="flex flex-col sm:flex-row items-center justify-around gap-6">
-                        <div class="w-48 h-48 relative shrink-0">
+                    <div class="flex items-center justify-around gap-2">
+                        <div class="w-32 h-32 relative shrink-0">
                             <canvas id="expenseChart"></canvas>
                         </div>
-                        <div class="w-full space-y-2">
-                            <h4 class="font-black text-xs text-slate-500 dark:text-slate-400">📝 消費紀錄明細</h4>
-                            <div id="acc-record-list" class="space-y-2 max-h-48 overflow-y-auto"></div>
+                        <div class="w-full space-y-1.5">
+                            <h4 class="font-black text-[10px] text-slate-400">📝 消費紀錄</h4>
+                            <div id="acc-record-list" class="space-y-1.5 max-h-36 overflow-y-auto"></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="cute-card bg-amber-50 dark:bg-slate-800 p-5 space-y-4">
-                    <h3 class="font-black text-sm text-slate-800 dark:text-white border-b-2 border-slate-200 dark:border-slate-700 pb-2">✏️ 新增消費記帳</h3>
-                    <div class="grid grid-cols-4 sm:grid-cols-8 gap-3 text-center">
-                        <button onclick="triggerFeedback(); selectAccCategory('晚餐', 'fa-utensils')" class="acc-cat-btn cute-btn bg-white dark:bg-slate-900 p-2.5 flex flex-col items-center gap-1 text-xs text-slate-800 dark:text-slate-100"><i class="fa-solid fa-utensils text-orange-500 text-base"></i><span>晚餐</span></button>
-                        <button onclick="triggerFeedback(); selectAccCategory('飲品', 'fa-mug-hot')" class="acc-cat-btn cute-btn bg-white dark:bg-slate-900 p-2.5 flex flex-col items-center gap-1 text-xs text-slate-800 dark:text-slate-100"><i class="fa-solid fa-mug-hot text-amber-600 text-base"></i><span>飲品</span></button>
-                        <button onclick="triggerFeedback(); selectAccCategory('早餐', 'fa-bread-slice')" class="acc-cat-btn cute-btn bg-white dark:bg-slate-900 p-2.5 flex flex-col items-center gap-1 text-xs text-slate-800 dark:text-slate-100"><i class="fa-solid fa-bread-slice text-yellow-600 text-base"></i><span>早餐</span></button>
-                        <button onclick="triggerFeedback(); selectAccCategory('午餐', 'fa-bowl-rice')" class="acc-cat-btn cute-btn bg-white dark:bg-slate-900 p-2.5 flex flex-col items-center gap-1 text-xs text-slate-800 dark:text-slate-100"><i class="fa-solid fa-bowl-rice text-red-500 text-base"></i><span>午餐</span></button>
-                        <button onclick="triggerFeedback(); selectAccCategory('交通', 'fa-train')" class="acc-cat-btn cute-btn bg-white dark:bg-slate-900 p-2.5 flex flex-col items-center gap-1 text-xs text-slate-800 dark:text-slate-100"><i class="fa-solid fa-train text-blue-500 text-base"></i><span>交通</span></button>
-                        <button onclick="triggerFeedback(); selectAccCategory('購物', 'fa-bag-shopping')" class="acc-cat-btn cute-btn bg-white dark:bg-slate-900 p-2.5 flex flex-col items-center gap-1 text-xs text-slate-800 dark:text-slate-100"><i class="fa-solid fa-bag-shopping text-pink-500 text-base"></i><span>購物</span></button>
-                        <button onclick="triggerFeedback(); selectAccCategory('門票', 'fa-ticket')" class="acc-cat-btn cute-btn bg-white dark:bg-slate-900 p-2.5 flex flex-col items-center gap-1 text-xs text-slate-800 dark:text-slate-100"><i class="fa-solid fa-ticket text-purple-500 text-base"></i><span>門票</span></button>
-                        <button onclick="triggerFeedback(); selectAccCategory('住宿', 'fa-hotel')" class="acc-cat-btn cute-btn bg-white dark:bg-slate-900 p-2.5 flex flex-col items-center gap-1 text-xs text-slate-800 dark:text-slate-100"><i class="fa-solid fa-hotel text-emerald-500 text-base"></i><span>住宿</span></button>
+                <div class="cute-card bg-amber-50 dark:bg-slate-800 p-3.5 space-y-3">
+                    <div class="grid grid-cols-4 gap-1.5 text-center">
+                        <button onclick="triggerFeedback(); selectAccCategory('晚餐', 'fa-utensils')" class="acc-cat-btn cute-btn bg-white dark:bg-slate-900 p-1.5 flex flex-col items-center gap-0.5 text-[10px]"><i class="fa-solid fa-utensils text-orange-500 text-xs"></i><span>晚餐</span></button>
+                        <button onclick="triggerFeedback(); selectAccCategory('飲品', 'fa-mug-hot')" class="acc-cat-btn cute-btn bg-white dark:bg-slate-900 p-1.5 flex flex-col items-center gap-0.5 text-[10px]"><i class="fa-solid fa-mug-hot text-amber-600 text-xs"></i><span>飲品</span></button>
+                        <button onclick="triggerFeedback(); selectAccCategory('早餐', 'fa-bread-slice')" class="acc-cat-btn cute-btn bg-white dark:bg-slate-900 p-1.5 flex flex-col items-center gap-0.5 text-[10px]"><i class="fa-solid fa-bread-slice text-yellow-600 text-xs"></i><span>早餐</span></button>
+                        <button onclick="triggerFeedback(); selectAccCategory('午餐', 'fa-bowl-rice')" class="acc-cat-btn cute-btn bg-white dark:bg-slate-900 p-1.5 flex flex-col items-center gap-0.5 text-[10px]"><i class="fa-solid fa-bowl-rice text-red-500 text-xs"></i><span>午餐</span></button>
+                        <button onclick="triggerFeedback(); selectAccCategory('交通', 'fa-train')" class="acc-cat-btn cute-btn bg-white dark:bg-slate-900 p-1.5 flex flex-col items-center gap-0.5 text-[10px]"><i class="fa-solid fa-train text-blue-500 text-xs"></i><span>交通</span></button>
+                        <button onclick="triggerFeedback(); selectAccCategory('購物', 'fa-bag-shopping')" class="acc-cat-btn cute-btn bg-white dark:bg-slate-900 p-1.5 flex flex-col items-center gap-0.5 text-[10px]"><i class="fa-solid fa-bag-shopping text-pink-500 text-xs"></i><span>購物</span></button>
+                        <button onclick="triggerFeedback(); selectAccCategory('門票', 'fa-ticket')" class="acc-cat-btn cute-btn bg-white dark:bg-slate-900 p-1.5 flex flex-col items-center gap-0.5 text-[10px]"><i class="fa-solid fa-ticket text-purple-500 text-xs"></i><span>門票</span></button>
+                        <button onclick="triggerFeedback(); selectAccCategory('住宿', 'fa-hotel')" class="acc-cat-btn cute-btn bg-white dark:bg-slate-900 p-1.5 flex flex-col items-center gap-0.5 text-[10px]"><i class="fa-solid fa-hotel text-emerald-500 text-xs"></i><span>住宿</span></button>
                     </div>
 
-                    <div class="bg-white dark:bg-slate-900 cute-border rounded-2xl p-3 flex justify-between items-center shadow-[3px_3px_0px_#1e293b]">
-                        <div class="flex items-center gap-2">
-                            <div id="acc-curr-cat-icon" class="w-8 h-8 rounded-xl bg-amber-200 dark:bg-amber-400 text-slate-900 cute-border flex items-center justify-center text-xs"><i class="fa-solid fa-utensils"></i></div>
-                            <span id="acc-curr-cat-name" class="font-black text-sm text-slate-900 dark:text-white">晚餐</span>
+                    <div class="bg-white dark:bg-slate-900 cute-border rounded-xl p-2.5 flex justify-between items-center shadow-[2px_2px_0px_#1e293b]">
+                        <div class="flex items-center gap-1.5">
+                            <div id="acc-curr-cat-icon" class="w-7 h-7 rounded-lg bg-amber-200 dark:bg-amber-400 text-slate-900 cute-border flex items-center justify-center text-xs"><i class="fa-solid fa-utensils"></i></div>
+                            <span id="acc-curr-cat-name" class="font-black text-xs text-slate-900 dark:text-white">晚餐</span>
                         </div>
                         <div class="text-right">
-                            <div class="text-2xl font-black text-slate-900 dark:text-white" id="acc-display-val">¥ 0</div>
-                            <div class="text-[10px] font-bold text-slate-400" id="acc-twd-val">≈ NT$ 0</div>
+                            <div class="text-lg font-black text-slate-900 dark:text-white" id="acc-display-val">¥ 0</div>
+                            <div class="text-[9px] font-bold text-slate-400" id="acc-twd-val">≈ NT$ 0</div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-4 gap-2 text-center font-black max-w-lg mx-auto">
-                        <button onclick="triggerFeedback(); pressKey('7')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-3 text-lg">7</button>
-                        <button onclick="triggerFeedback(); pressKey('8')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-3 text-lg">8</button>
-                        <button onclick="triggerFeedback(); pressKey('9')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-3 text-lg">9</button>
-                        <button onclick="triggerFeedback(); pressKey('AC')" class="cute-btn bg-sky-300 dark:bg-sky-600 text-slate-900 dark:text-white py-3 text-sm">AC</button>
-                        <button onclick="triggerFeedback(); pressKey('4')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-3 text-lg">4</button>
-                        <button onclick="triggerFeedback(); pressKey('5')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-3 text-lg">5</button>
-                        <button onclick="triggerFeedback(); pressKey('6')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-3 text-lg">6</button>
-                        <button onclick="triggerFeedback(); pressKey('DEL')" class="cute-btn bg-sky-300 dark:bg-sky-600 text-slate-900 dark:text-white py-3 text-sm">⌫</button>
-                        <button onclick="triggerFeedback(); pressKey('1')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-3 text-lg">1</button>
-                        <button onclick="triggerFeedback(); pressKey('2')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-3 text-lg">2</button>
-                        <button onclick="triggerFeedback(); pressKey('3')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-3 text-lg">3</button>
-                        <button onclick="triggerFeedback(); saveExpenseRecord()" class="cute-btn bg-rose-400 hover:bg-rose-500 text-white row-span-2 flex items-center justify-center text-base">OK</button>
-                        <button onclick="triggerFeedback(); pressKey('00')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-3 text-lg">00</button>
-                        <button onclick="triggerFeedback(); pressKey('0')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-3 text-lg">0</button>
-                        <button onclick="triggerFeedback(); pressKey('.')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-3 text-lg">.</button>
+                    <div class="grid grid-cols-4 gap-1.5 text-center font-black">
+                        <button onclick="triggerFeedback(); pressKey('7')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">7</button>
+                        <button onclick="triggerFeedback(); pressKey('8')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">8</button>
+                        <button onclick="triggerFeedback(); pressKey('9')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">9</button>
+                        <button onclick="triggerFeedback(); pressKey('AC')" class="cute-btn bg-sky-300 dark:bg-sky-600 text-slate-900 dark:text-white py-2 text-xs">AC</button>
+                        <button onclick="triggerFeedback(); pressKey('4')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">4</button>
+                        <button onclick="triggerFeedback(); pressKey('5')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">5</button>
+                        <button onclick="triggerFeedback(); pressKey('6')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">6</button>
+                        <button onclick="triggerFeedback(); pressKey('DEL')" class="cute-btn bg-sky-300 dark:bg-sky-600 text-slate-900 dark:text-white py-2 text-xs">⌫</button>
+                        <button onclick="triggerFeedback(); pressKey('1')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">1</button>
+                        <button onclick="triggerFeedback(); pressKey('2')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">2</button>
+                        <button onclick="triggerFeedback(); pressKey('3')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">3</button>
+                        <button onclick="triggerFeedback(); saveExpenseRecord()" class="cute-btn bg-rose-400 hover:bg-rose-500 text-white row-span-2 flex items-center justify-center text-sm font-black">OK</button>
+                        <button onclick="triggerFeedback(); pressKey('00')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">00</button>
+                        <button onclick="triggerFeedback(); pressKey('0')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">0</button>
+                        <button onclick="triggerFeedback(); pressKey('.')" class="cute-btn bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-2 text-base">.</button>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 5: TRANSLATION (真實翻譯 API 串接) -->
-            <div id="tab-translation" class="tab-page hidden space-y-6">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- TAB 5: TRANSLATION -->
+            <div id="tab-translation" class="tab-page hidden space-y-4">
+                <div class="cute-card bg-rose-100 dark:bg-rose-950 p-3.5 space-y-3 text-slate-900 dark:text-slate-100">
+                    <div class="flex items-center justify-between border-b-2 border-slate-200 dark:border-slate-800 pb-2">
+                        <h3 class="font-black text-xs flex items-center gap-1.5">
+                            <i class="fa-solid fa-camera-retro text-rose-600 dark:text-rose-400"></i> 📸 菜單與招牌拍照翻譯
+                        </h3>
+                        <span class="text-[9px] font-black bg-white dark:bg-slate-800 px-2 py-0.5 rounded-full cute-border">OCR 辨識</span>
+                    </div>
+
+                    <div class="border-3 border-dashed border-slate-800 dark:border-slate-300 rounded-xl p-4 text-center bg-white/80 dark:bg-slate-900/80 space-y-2">
+                        <input type="file" id="photo-upload-input" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                        <div id="photo-preview-container" class="hidden w-full h-32 rounded-lg overflow-hidden cute-border relative">
+                            <img id="uploaded-photo-preview" class="w-full h-full object-cover">
+                        </div>
+                        <div id="upload-placeholder" class="space-y-1">
+                            <i class="fa-solid fa-cloud-arrow-up text-2xl text-rose-500"></i>
+                            <div class="text-[11px] font-black">點擊下方按鈕拍攝或選擇照片</div>
+                        </div>
+                        <div class="flex justify-center gap-2 pt-1">
+                            <button onclick="triggerFeedback(); document.getElementById('photo-upload-input').click()" class="cute-btn bg-rose-300 dark:bg-rose-600 text-slate-900 dark:text-white px-3 py-1.5 text-xs">
+                                <i class="fa-solid fa-image mr-1"></i> 選擇照片/拍照
+                            </button>
+                            <button onclick="triggerFeedback(); runRealOCRTranslate()" id="ocr-run-btn" class="cute-btn bg-amber-300 text-slate-900 px-3 py-1.5 text-xs hidden">
+                                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 開始翻譯
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="ocr-result-box" class="bg-white dark:bg-slate-900 p-3 rounded-xl cute-border space-y-1.5 hidden">
+                        <h4 class="text-[11px] font-black text-rose-600 dark:text-rose-400">✨ 辨識與翻譯結果：</h4>
+                        <div id="ocr-translated-text" class="text-xs font-bold leading-relaxed text-slate-800 dark:text-slate-200"></div>
+                    </div>
+                </div>
+
+                <div class="cute-card bg-blue-100 dark:bg-blue-950 p-3.5 space-y-3 text-slate-900 dark:text-slate-100">
+                    <div class="flex items-center justify-between border-b-2 border-slate-200 dark:border-slate-800 pb-2">
+                        <h3 class="font-black text-xs flex items-center gap-1.5">
+                            <i class="fa-solid fa-comments text-blue-600 dark:text-blue-400"></i> 💬 真實即時文字互譯
+                        </h3>
+                        <span class="text-[9px] font-black bg-white dark:bg-slate-800 px-2 py-0.5 rounded-full cute-border">中 ⇄ 日</span>
+                    </div>
                     
-                    <!-- 1. 拍照/上傳圖片模擬翻譯區 -->
-                    <div class="cute-card bg-rose-100 dark:bg-rose-950 p-5 space-y-4 text-slate-900 dark:text-slate-100">
-                        <div class="flex items-center justify-between border-b-2 border-slate-200 dark:border-slate-800 pb-3">
-                            <h3 class="font-black text-base flex items-center gap-2">
-                                <i class="fa-solid fa-camera-retro text-rose-600 dark:text-rose-400"></i> 📸 菜單與招牌翻譯
-                            </h3>
-                            <span class="text-[10px] font-black bg-white dark:bg-slate-800 px-2 py-0.5 rounded-full cute-border">OCR 智慧模擬</span>
-                        </div>
-                        <p class="text-xs font-bold text-slate-700 dark:text-slate-300">
-                            上傳菜單、藥妝或路標照片，系統將為您辨識並即時翻譯：
-                        </p>
-
-                        <div class="border-4 border-dashed border-slate-800 dark:border-slate-300 rounded-2xl p-6 text-center bg-white/80 dark:bg-slate-900/80 space-y-3">
-                            <input type="file" id="photo-upload-input" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
-                            <div id="photo-preview-container" class="hidden w-full h-40 rounded-xl overflow-hidden cute-border relative">
-                                <img id="uploaded-photo-preview" class="w-full h-full object-cover">
-                            </div>
-                            <div id="upload-placeholder" class="space-y-2">
-                                <i class="fa-solid fa-cloud-arrow-up text-3xl text-rose-500"></i>
-                                <div class="text-xs font-black">點擊下方按鈕選擇照片或直接拍照</div>
-                            </div>
-                            <div class="flex justify-center gap-3 pt-2">
-                                <button onclick="triggerFeedback(); document.getElementById('photo-upload-input').click()" class="cute-btn bg-rose-300 dark:bg-rose-600 text-slate-900 dark:text-white px-4 py-2 text-xs">
-                                    <i class="fa-solid fa-image mr-1"></i> 選擇照片
-                                </button>
-                                <button onclick="triggerFeedback(); runRealOCRTranslate()" id="ocr-run-btn" class="cute-btn bg-amber-300 text-slate-900 px-4 py-2 text-xs hidden">
-                                    <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 開始辨識翻譯
-                                </button>
-                            </div>
-                        </div>
-
-                        <div id="ocr-result-box" class="bg-white dark:bg-slate-900 p-4 rounded-xl cute-border space-y-2 hidden">
-                            <h4 class="text-xs font-black text-rose-600 dark:text-rose-400">✨ 辨識與翻譯結果：</h4>
-                            <div id="ocr-translated-text" class="text-xs font-bold leading-relaxed text-slate-800 dark:text-slate-200"></div>
+                    <div class="space-y-2">
+                        <textarea id="translate-input" rows="2" placeholder="請輸入想翻譯成日文的中文（例如：我要這個、請問多少錢？）" class="w-full p-2.5 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white resize-none"></textarea>
+                        <div class="flex gap-1.5">
+                            <button onclick="triggerFeedback(); executeRealTranslate('zh-CN', 'ja')" class="cute-btn bg-blue-400 hover:bg-blue-500 text-white flex-1 py-2 text-xs font-black">
+                                中 ➔ 日 翻譯
+                            </button>
+                            <button onclick="triggerFeedback(); executeRealTranslate('ja', 'zh-CN')" class="cute-btn bg-purple-400 hover:bg-purple-500 text-white flex-1 py-2 text-xs font-black">
+                                日 ➔ 中 翻譯
+                            </button>
                         </div>
                     </div>
 
-                    <!-- 2. 真實即時文字互譯 (串接 MyMemory 雲端翻譯 API) -->
-                    <div class="cute-card bg-blue-100 dark:bg-blue-950 p-5 space-y-4 text-slate-900 dark:text-slate-100">
-                        <div class="flex items-center justify-between border-b-2 border-slate-200 dark:border-slate-800 pb-3">
-                            <h3 class="font-black text-base flex items-center gap-2">
-                                <i class="fa-solid fa-comments text-blue-600 dark:text-blue-400"></i> 💬 真實即時文字互譯
-                            </h3>
-                            <span class="text-[10px] font-black bg-white dark:bg-slate-800 px-2 py-0.5 rounded-full cute-border">中 ⇄ 日 線上翻譯</span>
-                        </div>
-                        
-                        <div class="space-y-3">
-                            <textarea id="translate-input" rows="2" placeholder="請輸入想翻譯成日文的中文（例如：我要這個、請問多少錢？）" class="w-full p-3 bg-white dark:bg-slate-900 cute-border rounded-xl text-xs font-bold outline-none dark:text-white resize-none"></textarea>
-                            <div class="flex gap-2">
-                                <button onclick="triggerFeedback(); executeRealTranslate('zh-CN', 'ja')" class="cute-btn bg-blue-400 hover:bg-blue-500 text-white flex-1 py-2.5 text-xs font-black">
-                                    中 ➔ 日 翻譯
-                                </button>
-                                <button onclick="triggerFeedback(); executeRealTranslate('ja', 'zh-CN')" class="cute-btn bg-purple-400 hover:bg-purple-500 text-white flex-1 py-2.5 text-xs font-black">
-                                    日 ➔ 中 翻譯
-                                </button>
-                            </div>
-                        </div>
-
-                        <div id="text-translate-result" class="bg-white dark:bg-slate-900 p-3.5 rounded-xl cute-border space-y-1 hidden">
-                            <div class="text-[10px] font-black text-blue-600 dark:text-blue-400">翻譯結果：</div>
-                            <div id="res-jp" class="text-sm font-black text-slate-900 dark:text-white"></div>
-                            <div id="res-read" class="text-xs font-bold text-slate-500 dark:text-slate-400"></div>
-                        </div>
-
-                        <!-- 快速應急日文卡片 -->
-                        <div class="space-y-2 pt-2">
-                            <h4 class="text-xs font-black text-slate-700 dark:text-slate-300">⚡ 快速應急日文卡片（點擊直接翻譯）</h4>
-                            <div class="grid grid-cols-2 gap-2 text-xs font-bold">
-                                <div onclick="triggerFeedback(); quickTranslatePhrase('請問多少錢？')" class="bg-white dark:bg-slate-900 p-2.5 cute-border rounded-xl cursor-pointer hover:bg-amber-100 transition">
-                                    💰 請問多少錢？
-                                </div>
-                                <div onclick="triggerFeedback(); quickTranslatePhrase('可以刷卡嗎？')" class="bg-white dark:bg-slate-900 p-2.5 cute-border rounded-xl cursor-pointer hover:bg-amber-100 transition">
-                                    💳 可以刷卡嗎？
-                                </div>
-                                <div onclick="triggerFeedback(); quickTranslatePhrase('我要這個')" class="bg-white dark:bg-slate-900 p-2.5 cute-border rounded-xl cursor-pointer hover:bg-amber-100 transition">
-                                    👉 我要這個
-                                </div>
-                                <div onclick="triggerFeedback(); quickTranslatePhrase('請問洗手間在哪裡？')" class="bg-white dark:bg-slate-900 p-2.5 cute-border rounded-xl cursor-pointer hover:bg-amber-100 transition">
-                                    🚻 洗手間在哪？
-                                </div>
-                            </div>
-                        </div>
+                    <div id="text-translate-result" class="bg-white dark:bg-slate-900 p-3 rounded-xl cute-border space-y-1 hidden">
+                        <div class="text-[9px] font-black text-blue-600 dark:text-blue-400">翻譯結果：</div>
+                        <div id="res-jp" class="text-xs font-black text-slate-900 dark:text-white"></div>
+                        <div id="res-read" class="text-[10px] font-bold text-slate-500 dark:text-slate-400"></div>
                     </div>
 
+                    <div class="space-y-1.5 pt-1">
+                        <h4 class="text-[11px] font-black text-slate-700 dark:text-slate-300">⚡ 快速應急日文卡片（點擊直接翻譯）</h4>
+                        <div class="grid grid-cols-2 gap-1.5 text-[11px] font-bold">
+                            <div onclick="triggerFeedback(); quickTranslatePhrase('請問多少錢？')" class="bg-white dark:bg-slate-900 p-2 cute-border rounded-lg cursor-pointer">💰 請問多少錢？</div>
+                            <div onclick="triggerFeedback(); quickTranslatePhrase('可以刷卡嗎？')" class="bg-white dark:bg-slate-900 p-2 cute-border rounded-lg cursor-pointer">💳 可以刷卡嗎？</div>
+                            <div onclick="triggerFeedback(); quickTranslatePhrase('我要這個')" class="bg-white dark:bg-slate-900 p-2 cute-border rounded-lg cursor-pointer">👉 我要這個</div>
+                            <div onclick="triggerFeedback(); quickTranslatePhrase('請問洗手間在哪裡？')" class="bg-white dark:bg-slate-900 p-2 cute-border rounded-lg cursor-pointer">🚻 洗手間在哪？</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- TAB 6: TAXI -->
-            <div id="tab-taxi" class="tab-page hidden space-y-6">
-                <h2 class="text-lg font-black text-slate-900 dark:text-white">🚕 日本叫車與計程車專區</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="cute-card bg-blue-100 dark:bg-blue-950 p-5 flex flex-col justify-between text-slate-900 dark:text-slate-100">
-                        <div class="space-y-2">
-                            <div class="w-12 h-12 bg-blue-600 text-white rounded-2xl cute-border flex items-center justify-center font-black text-xl">GO</div>
-                            <h3 class="font-black text-base">Japan Taxi (GO)</h3>
-                            <p class="text-xs font-bold text-slate-600 dark:text-slate-300">日本覆蓋率最高的計程車 App，支援信用卡付費與預約叫車。</p>
+            <div id="tab-taxi" class="tab-page hidden space-y-3">
+                <h2 class="text-sm font-black text-slate-900 dark:text-white">🚕 計程車與叫車服務</h2>
+                <div class="grid grid-cols-1 gap-3">
+                    <div class="cute-card bg-blue-100 dark:bg-blue-950 p-4 flex justify-between items-center text-slate-900 dark:text-slate-100">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 bg-blue-600 text-white rounded-xl cute-border flex items-center justify-center font-black text-sm">GO</div>
+                                <h3 class="font-black text-sm">Japan Taxi (GO)</h3>
+                            </div>
+                            <p class="text-[10px] font-bold text-slate-600 dark:text-slate-300">日本覆蓋率最高的計程車 App</p>
                         </div>
-                        <a href="https://go.mo-t.com/" target="_blank" class="cute-btn mt-4 block text-center bg-white dark:bg-slate-800 text-slate-900 dark:text-white py-2 text-xs font-black">開啟 GO 官網 ↗</a>
+                        <a href="https://go.mo-t.com/" target="_blank" class="cute-btn bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-1.5 text-xs font-black">開啟 GO ↗</a>
                     </div>
-                    <div class="cute-card bg-slate-100 dark:bg-slate-800 p-5 flex flex-col justify-between text-slate-900 dark:text-slate-100">
-                        <div class="space-y-2">
-                            <div class="w-12 h-12 bg-black text-white rounded-2xl cute-border flex items-center justify-center font-black text-xl"><i class="fa-brands fa-uber"></i></div>
-                            <h3 class="font-black text-base">Uber Japan</h3>
-                            <p class="text-xs font-bold text-slate-600 dark:text-slate-300">東京、大阪各大都市皆可無縫使用台灣 Uber App 直接叫車。</p>
+                    <div class="cute-card bg-slate-100 dark:bg-slate-800 p-4 flex justify-between items-center text-slate-900 dark:text-slate-100">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 bg-black text-white rounded-xl cute-border flex items-center justify-center font-black text-sm"><i class="fa-brands fa-uber"></i></div>
+                                <h3 class="font-black text-sm">Uber Japan</h3>
+                            </div>
+                            <p class="text-[10px] font-bold text-slate-600 dark:text-slate-300">東京、大阪各大都市皆可叫車</p>
                         </div>
-                        <a href="https://www.uber.com/jp/ja/" target="_blank" class="cute-btn mt-4 block text-center bg-amber-300 dark:bg-amber-500 text-slate-900 py-2 text-xs font-black">開啟 Uber JP ↗</a>
+                        <a href="https://www.uber.com/jp/ja/" target="_blank" class="cute-btn bg-amber-300 dark:bg-amber-500 text-slate-900 px-3 py-1.5 text-xs font-black">開啟 Uber ↗</a>
                     </div>
                 </div>
             </div>
 
         </div>
+
+        <!-- 底部固定選單 Bottom App Navigation Bar -->
+        <nav class="bg-white/95 dark:bg-[#1e293b]/95 backdrop-blur-md border-t-3 border-slate-800 dark:border-slate-100 flex items-center justify-around py-1.5 px-1 absolute bottom-0 left-0 right-0 z-30">
+            <button onclick="triggerFeedback(); switchTab('dashboard')" id="nav-dashboard" class="bottom-nav-btn active">
+                <i class="fa-solid fa-chart-pie text-base mb-0.5"></i> 總覽
+            </button>
+            <button onclick="triggerFeedback(); switchTab('schedule')" id="nav-schedule" class="bottom-nav-btn">
+                <i class="fa-solid fa-calendar-days text-base mb-0.5"></i> 行程
+            </button>
+            <button onclick="triggerFeedback(); switchTab('food')" id="nav-food" class="bottom-nav-btn">
+                <i class="fa-solid fa-utensils text-base mb-0.5"></i> 美食
+            </button>
+            <button onclick="triggerFeedback(); switchTab('accounting')" id="nav-accounting" class="bottom-nav-btn">
+                <i class="fa-solid fa-calculator text-base mb-0.5"></i> 記帳
+            </button>
+            <button onclick="triggerFeedback(); switchTab('translation')" id="nav-translation" class="bottom-nav-btn">
+                <i class="fa-solid fa-language text-base text-rose-500 mb-0.5"></i> 翻譯
+            </button>
+            <button onclick="triggerFeedback(); switchTab('taxi')" id="nav-taxi" class="bottom-nav-btn">
+                <i class="fa-solid fa-taxi text-base mb-0.5"></i> 叫車
+            </button>
+        </nav>
     </div>
 
     <!-- JavaScript 核心邏輯 -->
@@ -509,6 +492,18 @@
         let currentTab = 'dashboard';
         let exchangeRate = 0.21;
         let chartInstance = null;
+
+        // 分類對應的 Unsplash 優質美食照片庫
+        const categoryImages = {
+            '拉麵': 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80',
+            '燒肉': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+            '壽司': 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=600&q=80',
+            '甜點': 'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&q=80',
+            '咖啡': 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=80',
+            '居酒屋': 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80',
+            '鰻魚飯': 'https://images.unsplash.com/photo-1611143669185-af224c5e3252?auto=format&fit=crop&w=600&q=80',
+            '預設': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80'
+        };
 
         let defaultSchedules = [
             { day: "Day 1 - 10/25", title: "10:00 淺草寺參拜 ➔ 13:00 秋葉原動漫漫步", route: "乘車指引：從『淺草站』搭乘東京地鐵銀座線至『神田站』，轉乘 JR 山手線 1 站即達『秋葉原站』" },
@@ -519,9 +514,22 @@
         let schedules = JSON.parse(localStorage.getItem('jap_schedules_cute')) || defaultSchedules;
         if (schedules.length === 0) schedules = defaultSchedules;
 
-        let foods = JSON.parse(localStorage.getItem('jap_foods_cute')) || [
-            { name: "黑毛和牛壽喜燒 日本橋一里", category: "燒肉", location: "東京日本橋", mapUrl: "https://www.google.com/maps/search/?api=1&query=日本橋一里+壽喜燒" }
+        let defaultFoods = [
+            { 
+                name: "黑毛和牛壽喜燒 日本橋一里", 
+                category: "燒肉", 
+                mapUrl: "https://www.google.com/maps/search/?api=1&query=黑毛和牛壽喜燒+日本橋一里",
+                imageUrl: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80"
+            },
+            { 
+                name: "一蘭拉麵 淺草店", 
+                category: "拉麵", 
+                mapUrl: "https://www.google.com/maps/search/?api=1&query=一蘭拉麵+淺草店",
+                imageUrl: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80"
+            }
         ];
+
+        let foods = JSON.parse(localStorage.getItem('jap_foods_cute')) || defaultFoods;
 
         let expenseRecords = JSON.parse(localStorage.getItem('jap_expenses_cute')) || [
             { cat: "晚餐", amount: 3500, twd: 735, date: "10/25" },
@@ -576,17 +584,17 @@
                 const dirUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}&travelmode=transit`;
 
                 container.innerHTML = `
-                    <div class="bg-white/90 dark:bg-slate-900/90 p-4 cute-border rounded-xl text-xs font-bold space-y-3">
-                        <div class="flex justify-between items-center border-b pb-2 border-slate-200 dark:border-slate-700">
-                            <span class="text-orange-600 dark:text-orange-400 font-black text-sm"><i class="fa-solid fa-clock mr-1"></i>${targetSchedule.day} 行程安排</span>
-                            <a href="${dirUrl}" target="_blank" class="cute-btn bg-amber-300 dark:bg-amber-500 text-slate-900 px-3 py-1 text-[11px]">開啟 Google 路線導航 ↗</a>
+                    <div class="bg-white/90 dark:bg-slate-900/90 p-3 cute-border rounded-xl text-xs font-bold space-y-2">
+                        <div class="flex justify-between items-center border-b pb-1.5 border-slate-200 dark:border-slate-700">
+                            <span class="text-orange-600 dark:text-orange-400 font-black text-xs"><i class="fa-solid fa-clock mr-1"></i>${targetSchedule.day} 行程</span>
+                            <a href="${dirUrl}" target="_blank" class="cute-btn bg-amber-300 dark:bg-amber-500 text-slate-900 px-2 py-0.5 text-[10px]">Google 導航 ↗</a>
                         </div>
-                        <div class="text-base font-black text-slate-900 dark:text-white">${targetSchedule.title}</div>
-                        <div class="text-xs text-slate-700 dark:text-slate-300 bg-amber-50 dark:bg-slate-800 p-2.5 rounded-lg cute-border">
-                            <strong class="text-indigo-600 dark:text-indigo-400 block mb-1"><i class="fa-solid fa-train-subway mr-1"></i>乘車與轉乘指引：</strong>
+                        <div class="text-sm font-black text-slate-900 dark:text-white">${targetSchedule.title}</div>
+                        <div class="text-[11px] text-slate-700 dark:text-slate-300 bg-amber-50 dark:bg-slate-800 p-2 rounded-lg cute-border">
+                            <strong class="text-indigo-600 dark:text-indigo-400 block mb-0.5"><i class="fa-solid fa-train-subway mr-1"></i>乘車指引：</strong>
                             ${targetSchedule.route || '搭乘大眾運輸前往目的地'}
                         </div>
-                        <div class="w-full h-44 rounded-xl overflow-hidden cute-border">
+                        <div class="w-full h-36 rounded-xl overflow-hidden cute-border">
                             <iframe class="w-full h-full" frameborder="0" style="border:0" src="https://maps.google.com/maps?q=${encodeURIComponent(dest)}&t=&z=14&ie=UTF8&iwloc=&output=embed" allowfullscreen></iframe>
                         </div>
                     </div>
@@ -596,7 +604,114 @@
             }
         }
 
-        /* 拍照圖片上傳與模擬辨識 */
+        /* 自動從 Google Map 分享網址中解析店名 */
+        function autoParseMapUrl(url) {
+            if (!url) return;
+            try {
+                // 如果是 Google 地圖地點網址 (如 /place/店名/...)
+                if (url.includes('/place/')) {
+                    const match = url.match(/\/place\/([^\/]+)/);
+                    if (match && match[1]) {
+                        const parsedName = decodeURIComponent(match[1].replace(/\+/g, ' '));
+                        const nameInput = document.getElementById('food-name');
+                        if (nameInput && !nameInput.value) {
+                            nameInput.value = parsedName;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.log("網址解析提示: 無法自動取得店名，請手動填寫");
+            }
+        }
+
+        /* 取得圖片：若使用者有填寫圖片則優先，否則根據分類匹配高清圖片 */
+        function getFoodCoverImage(food) {
+            if (food.imageUrl && food.imageUrl.trim() !== '') return food.imageUrl;
+            for (let key in categoryImages) {
+                if (food.category && food.category.includes(key)) {
+                    return categoryImages[key];
+                }
+            }
+            return categoryImages['預設'];
+        }
+
+        /* 渲染美食卡片 (結合圖片與地圖) */
+        function generateFoodCardsHTML(prefix) {
+            if (foods.length === 0) return `<div class="text-xs text-slate-400 py-6 text-center font-bold">尚無美食口袋名單</div>`;
+            return foods.map((f, idx) => {
+                let mapQuery = encodeURIComponent(f.name);
+                let embedUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+                let coverImg = getFoodCoverImage(f);
+
+                return `
+                <div class="cute-card bg-orange-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 overflow-hidden relative">
+                    <!-- 美食/店家照片封面 -->
+                    <div class="relative w-full h-36 bg-slate-200 overflow-hidden border-b-3 border-slate-800 dark:border-slate-100">
+                        <img src="${coverImg}" alt="${f.name}" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" onerror="this.src='${categoryImages['預設']}'">
+                        <div class="absolute top-2 left-2">
+                            <span class="text-[10px] font-black bg-white dark:bg-slate-900 text-slate-900 dark:text-white cute-border px-2 py-0.5 rounded-full shadow-sm">${f.category || '美食'}</span>
+                        </div>
+                        <button onclick="event.stopPropagation(); triggerFeedback(); deleteFood(${idx})" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white cute-border flex items-center justify-center text-xs hover:bg-rose-400 transition shadow-md">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+
+                    <!-- 資訊區 (點擊展開地圖) -->
+                    <div onclick="triggerFeedback(); toggleFoodMap('${prefix}', ${idx})" class="p-3 cursor-pointer space-y-1 bg-amber-50/60 dark:bg-slate-900/60">
+                        <h3 class="text-sm font-black text-slate-900 dark:text-white">${f.name}</h3>
+                        <p class="text-[10px] font-bold text-slate-600 dark:text-slate-300 flex items-center justify-between">
+                            <span><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>點擊展開查看 Google 即時地圖</span>
+                            <span class="text-amber-600 dark:text-amber-400 font-black"><i class="fa-solid fa-chevron-down"></i></span>
+                        </p>
+                    </div>
+
+                    <!-- 展開地圖區 -->
+                    <div id="${prefix}-food-detail-${idx}" class="expandable-content border-t-3 border-slate-800 dark:border-slate-100 bg-white dark:bg-slate-900 p-3 space-y-2">
+                        <div class="flex justify-between items-center text-xs font-black">
+                            <span class="text-orange-800 dark:text-orange-300"><i class="fa-solid fa-map-location-dot text-amber-500 mr-1"></i>店家即時地圖</span>
+                            <a href="${f.mapUrl || 'https://www.google.com/maps/search/?api=1&query=' + mapQuery}" target="_blank" class="cute-btn bg-orange-300 dark:bg-orange-600 text-slate-900 dark:text-white px-2 py-0.5 text-[10px]">Google 地圖導航 ↗</a>
+                        </div>
+                        <div class="w-full h-36 rounded-xl overflow-hidden cute-border">
+                            <iframe class="w-full h-full" frameborder="0" style="border:0" src="${embedUrl}" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+
+        function renderDashboardFoods() { const c = document.getElementById('dash-food-list'); if (c) c.innerHTML = generateFoodCardsHTML('dash'); }
+        function renderFullFoods() { const c = document.getElementById('full-food-list'); if (c) c.innerHTML = generateFoodCardsHTML('full'); }
+        function toggleFoodMap(prefix, idx) { const el = document.getElementById(`${prefix}-food-detail-${idx}`); if (el) el.classList.toggle('expanded'); }
+
+        function addFood() {
+            const name = document.getElementById('food-name').value.trim();
+            const category = document.getElementById('food-cat').value.trim() || '美食';
+            const mapUrl = document.getElementById('food-map-url').value.trim();
+            const imageUrl = document.getElementById('food-img-url').value.trim();
+            if (!name) return alert('請輸入美食店名！');
+
+            foods.push({ name, category, mapUrl, imageUrl });
+            localStorage.setItem('jap_foods_cute', JSON.stringify(foods));
+
+            document.getElementById('food-name').value = '';
+            document.getElementById('food-cat').value = '';
+            document.getElementById('food-map-url').value = '';
+            document.getElementById('food-img-url').value = '';
+
+            closeDrawer();
+            renderDashboardFoods();
+            renderFullFoods();
+        }
+
+        function deleteFood(idx) {
+            foods.splice(idx, 1);
+            localStorage.setItem('jap_foods_cute', JSON.stringify(foods));
+            renderDashboardFoods();
+            renderFullFoods();
+        }
+
+        /* 拍攝與翻譯 API 邏輯 */
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -621,11 +736,10 @@
                 <div class="animate-pulse text-rose-500 font-bold mb-1">🔍 正在進行圖片文字辨識...</div>
                 <div><strong>辨識結果：</strong>本日のおすすめ定食（小鉢・お味噌汁付き）</div>
                 <div class="text-slate-600 dark:text-slate-300 mt-1"><strong>即時翻譯：</strong>今日特選定食（附小菜、味噌湯）</div>
-                <div class="text-amber-600 dark:text-amber-400 text-[11px] mt-2">💡 價格參考：約 ¥1,200（約合台幣 NT$252）</div>
+                <div class="text-amber-600 dark:text-amber-400 text-[10px] mt-1.5">💡 價格參考：約 ¥1,200（約合台幣 NT$252）</div>
             `;
         }
 
-        /* 串接真實雲端翻譯 API (MyMemory API) */
         async function executeRealTranslate(langFrom, langTo) {
             const input = document.getElementById('translate-input').value.trim();
             const resBox = document.getElementById('text-translate-result');
@@ -646,12 +760,11 @@
                 if (data && data.responseData) {
                     const translatedText = data.responseData.translatedText;
                     resJp.innerText = translatedText;
-                    resRead.innerText = langTo === 'ja' ? "（已透過線上翻譯引擎轉為日文）" : "（已翻譯為中文）";
+                    resRead.innerText = langTo === 'ja' ? "（已轉為日文）" : "（已轉為中文）";
                 } else {
                     resJp.innerText = "翻譯發生錯誤，請稍後再試";
                 }
             } catch (err) {
-                // 網路失敗時的備用方案
                 resJp.innerText = input + " (翻譯連線異常，請檢查網路)";
             }
         }
@@ -684,17 +797,14 @@
         function toggleDarkMode() {
             const html = document.documentElement;
             const icon = document.getElementById('dark-mode-icon');
-            const text = document.getElementById('dark-mode-text');
             if (html.classList.contains('dark')) {
                 html.classList.remove('dark');
                 localStorage.setItem('jap_theme_cute', 'light');
-                if (icon) icon.className = "fa-solid fa-moon text-sm";
-                if (text) text.innerText = "夜間";
+                if (icon) icon.className = "fa-solid fa-moon";
             } else {
                 html.classList.add('dark');
                 localStorage.setItem('jap_theme_cute', 'dark');
-                if (icon) icon.className = "fa-solid fa-sun text-sm text-yellow-400";
-                if (text) text.innerText = "日照";
+                if (icon) icon.className = "fa-solid fa-sun text-yellow-400";
             }
         }
 
@@ -702,9 +812,7 @@
             document.documentElement.classList.add('dark');
             document.addEventListener("DOMContentLoaded", () => {
                 const icon = document.getElementById('dark-mode-icon');
-                const text = document.getElementById('dark-mode-text');
-                if (icon) icon.className = "fa-solid fa-sun text-sm text-yellow-400";
-                if (text) text.innerText = "日照";
+                if (icon) icon.className = "fa-solid fa-sun text-yellow-400";
             });
         }
 
@@ -718,30 +826,51 @@
             document.querySelectorAll('.tab-page').forEach(el => el.classList.add('hidden'));
             document.getElementById(`tab-${tabName}`).classList.remove('hidden');
 
-            document.querySelectorAll('.top-nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.bottom-nav-btn').forEach(btn => btn.classList.remove('active'));
             const activeNav = document.getElementById(`nav-${tabName}`);
             if (activeNav) activeNav.classList.add('active');
 
             closeDrawer();
 
             const titles = {
-                dashboard: "日本旅遊綜合儀表板",
-                schedule: "每日行程詳細規劃",
-                food: "美食口袋名單與餐廳",
-                accounting: "記帳",
-                translation: "即時翻譯與拍照翻譯專區",
-                taxi: "叫車服務與交通指引"
+                dashboard: "日本旅遊總覽",
+                schedule: "每日行程規劃",
+                food: "美食照片與地圖",
+                accounting: "旅遊記帳本",
+                translation: "即時翻譯與拍照翻譯",
+                taxi: "計程車叫車指引"
             };
             document.getElementById('page-title').innerText = titles[tabName] || "日本旅遊小幫手";
         }
 
+        function switchFormType(type) {
+            const schForm = document.getElementById('form-schedule');
+            const foodForm = document.getElementById('form-food');
+            const btnSch = document.getElementById('btn-form-sch');
+            const btnFood = document.getElementById('btn-form-food');
+
+            if (type === 'schedule') {
+                schForm.classList.remove('hidden');
+                foodForm.classList.add('hidden');
+                btnSch.className = "cute-btn bg-indigo-300 text-slate-900 px-3 py-1 text-xs";
+                btnFood.className = "cute-btn bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-1 text-xs";
+            } else {
+                schForm.classList.add('hidden');
+                foodForm.classList.remove('hidden');
+                btnFood.className = "cute-btn bg-orange-300 text-slate-900 px-3 py-1 text-xs";
+                btnSch.className = "cute-btn bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-1 text-xs";
+            }
+        }
+
         function toggleFormModal() {
             document.getElementById('quick-form-drawer').classList.toggle('open');
-            updateDrawerFields();
         }
 
         function openDrawer(type) {
-            if (type) switchTab(type);
+            if (type) {
+                switchTab(type);
+                switchFormType(type);
+            }
             document.getElementById('quick-form-drawer').classList.add('open');
         }
 
@@ -749,28 +878,28 @@
             document.getElementById('quick-form-drawer').classList.remove('open');
         }
 
-        /* 渲染行程卡片 HTML */
+        /* 渲染行程卡片 */
         function generateScheduleCardsHTML(prefix) {
             if (schedules.length === 0) return `<div class="text-xs text-slate-400 py-6 text-center font-bold">尚無行程</div>`;
             return schedules.map((s, idx) => {
                 const encodedTitle = encodeURIComponent(s.title);
                 return `
                 <div class="cute-card bg-indigo-200 dark:bg-indigo-950 text-slate-900 dark:text-slate-100 overflow-hidden relative">
-                    <div onclick="triggerFeedback(); toggleScheduleMap('${prefix}', ${idx})" class="p-5 cursor-pointer relative z-10 space-y-2">
+                    <div onclick="triggerFeedback(); toggleScheduleMap('${prefix}', ${idx})" class="p-3 cursor-pointer space-y-1">
                         <div class="flex justify-between items-start">
-                            <span class="text-xs font-black bg-white dark:bg-slate-800 text-slate-900 dark:text-white cute-border px-3 py-1 rounded-full shadow-[2px_2px_0px_#1e293b]">${s.day}</span>
-                            <button onclick="event.stopPropagation(); triggerFeedback(); deleteSchedule(${idx})" class="w-8 h-8 rounded-full bg-white dark:bg-slate-800 text-slate-900 dark:text-white cute-border flex items-center justify-center text-xs hover:bg-rose-400 transition"><i class="fa-solid fa-trash-can"></i></button>
+                            <span class="text-[10px] font-black bg-white dark:bg-slate-800 text-slate-900 dark:text-white cute-border px-2 py-0.5 rounded-full">${s.day}</span>
+                            <button onclick="event.stopPropagation(); triggerFeedback(); deleteSchedule(${idx})" class="w-6 h-6 rounded-full bg-white dark:bg-slate-800 text-slate-900 dark:text-white cute-border flex items-center justify-center text-[10px] hover:bg-rose-400 transition"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
-                        <h3 class="text-xl sm:text-2xl font-black tracking-tight">${s.title}</h3>
-                        <p class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5"><i class="fa-solid fa-train text-indigo-700 dark:text-indigo-400"></i>${s.route || '無詳細交通路線'}</p>
+                        <h3 class="text-sm font-black tracking-tight">${s.title}</h3>
+                        <p class="text-[10px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1"><i class="fa-solid fa-train text-indigo-700 dark:text-indigo-400"></i>${s.route || '無詳細交通路線'}</p>
                     </div>
 
-                    <div id="${prefix}-sch-detail-${idx}" class="expandable-content border-t-4 border-slate-800 dark:border-slate-100 bg-white dark:bg-slate-900 p-4 space-y-3">
+                    <div id="${prefix}-sch-detail-${idx}" class="expandable-content border-t-3 border-slate-800 dark:border-slate-100 bg-white dark:bg-slate-900 p-3 space-y-2">
                         <div class="flex justify-between items-center text-xs font-black">
-                            <span class="text-indigo-800 dark:text-indigo-300"><i class="fa-solid fa-map-location-dot text-amber-500 mr-1.5"></i>Google 路線導航與地圖</span>
-                            <a href="https://www.google.com/maps/search/?api=1&query=${encodedTitle}" target="_blank" class="cute-btn bg-indigo-300 dark:bg-indigo-600 text-slate-900 dark:text-white px-3 py-1">全螢幕開啟 ↗</a>
+                            <span class="text-indigo-800 dark:text-indigo-300"><i class="fa-solid fa-map-location-dot text-amber-500 mr-1"></i>Google 地圖與路線</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=${encodedTitle}" target="_blank" class="cute-btn bg-indigo-300 dark:bg-indigo-600 text-slate-900 dark:text-white px-2 py-0.5 text-[10px]">Google 地圖 ↗</a>
                         </div>
-                        <div class="w-full h-52 rounded-xl overflow-hidden cute-border">
+                        <div class="w-full h-40 rounded-xl overflow-hidden cute-border">
                             <iframe class="w-full h-full" frameborder="0" style="border:0" src="https://maps.google.com/maps?q=${encodedTitle}&t=&z=14&ie=UTF8&iwloc=&output=embed" allowfullscreen></iframe>
                         </div>
                     </div>
@@ -810,19 +939,6 @@
             renderFullSchedules();
         }
 
-        function generateFoodCardsHTML() {
-            if (foods.length === 0) return `<div class="text-xs text-slate-400 py-6 text-center font-bold">尚無美食口袋名單</div>`;
-            return foods.map(f => `
-                <div class="cute-card bg-orange-200 dark:bg-orange-950 text-slate-900 dark:text-slate-100 p-4 space-y-2">
-                    <span class="text-xs font-black bg-white dark:bg-slate-800 text-slate-900 dark:text-white cute-border px-2.5 py-0.5 rounded-full">${f.category}</span>
-                    <h3 class="text-base font-black">${f.name}</h3>
-                    <p class="text-xs font-bold text-slate-700 dark:text-slate-300"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>${f.location}</p>
-                </div>
-            `).join('');
-        }
-        function renderDashboardFoods() { const c = document.getElementById('dash-food-list'); if (c) c.innerHTML = generateFoodCardsHTML(); }
-        function renderFullFoods() { const c = document.getElementById('full-food-list'); if (c) c.innerHTML = generateFoodCardsHTML(); }
-
         /* 記帳與計算機邏輯 */
         let currentCat = "晚餐";
         let calcInput = "";
@@ -859,15 +975,15 @@
             if (!container) return;
             let sumJpy = 0, sumTwd = 0;
             if (expenseRecords.length === 0) {
-                container.innerHTML = `<div class="text-xs text-slate-400 py-4 text-center font-bold">尚無消費紀錄</div>`;
+                container.innerHTML = `<div class="text-[10px] text-slate-400 py-2 text-center font-bold">尚無消費紀錄</div>`;
             } else {
                 container.innerHTML = expenseRecords.map((r, idx) => {
                     sumJpy += r.amount; sumTwd += r.twd;
                     return `
-                        <div class="flex justify-between items-center p-2.5 bg-amber-50 dark:bg-slate-900 cute-border rounded-xl text-xs font-bold text-slate-900 dark:text-white">
-                            <div class="flex items-center gap-2"><span class="bg-white dark:bg-slate-800 cute-border px-2 py-0.5 rounded-lg text-[10px]">${r.cat}</span><span>${r.date}</span></div>
-                            <div class="flex items-center gap-3">
-                                <div><span class="text-orange-600 dark:text-orange-400 block font-black">¥${r.amount.toLocaleString()}</span><span class="text-[10px] text-slate-400 block">NT$ ${r.twd.toLocaleString()}</span></div>
+                        <div class="flex justify-between items-center p-2 bg-amber-50 dark:bg-slate-900 cute-border rounded-lg text-[10px] font-bold text-slate-900 dark:text-white">
+                            <div class="flex items-center gap-1.5"><span class="bg-white dark:bg-slate-800 cute-border px-1.5 py-0.2 rounded text-[9px]">${r.cat}</span><span>${r.date}</span></div>
+                            <div class="flex items-center gap-2">
+                                <div><span class="text-orange-600 dark:text-orange-400 block font-black">¥${r.amount.toLocaleString()}</span></div>
                                 <button onclick="triggerFeedback(); deleteExpense(${idx})" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark"></i></button>
                             </div>
                         </div>
@@ -902,7 +1018,7 @@
             expenseRecords.forEach(r => { totals[r.cat] = (totals[r.cat] || 0) + r.amount; });
             return {
                 labels: Object.keys(totals),
-                datasets: [{ data: Object.values(totals), backgroundColor: ['#f87171', '#fb923c', '#fbbf24', '#34d399', '#60a5fa', '#c084fc'], borderWidth: 3, borderColor: '#1e293b' }]
+                datasets: [{ data: Object.values(totals), backgroundColor: ['#f87171', '#fb923c', '#fbbf24', '#34d399', '#60a5fa', '#c084fc'], borderWidth: 2.5, borderColor: '#1e293b' }]
             };
         }
         function updateChart() { if (chartInstance) { chartInstance.data = getChartData(); chartInstance.update(); } }
