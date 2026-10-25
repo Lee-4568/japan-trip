@@ -12,7 +12,7 @@
     <!-- Leaflet.js for Real-time GPS Location Mapping -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Firebase SDK (用於真正免架設伺服器的雲端即時同步) -->
+    <!-- Firebase SDK (用於免架設伺服器的雲端即時同步) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script>
@@ -43,9 +43,7 @@
             margin: 0;
             display: flex;
             justify-content: center;
-            align-items: center;
             min-height: 100vh;
-            overflow: hidden;
         }
         .dark body { background: #0f172a; }
 
@@ -79,6 +77,7 @@
         }
         .cute-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0px #1e293b; }
 
+        /* 手機 App 底部導覽列按鈕 */
         .bottom-nav-btn {
             flex: 1;
             display: flex;
@@ -92,7 +91,7 @@
             transition: all 0.15s ease;
         }
         .dark .bottom-nav-btn { color: #94a3b8; }
-        .bottom-nav-btn.active { color: #0284c7; font-weight: 900; transform: translateY(-2px); }
+        .bottom-nav-btn.active { color: #0284c7; font-weight: 900; }
         .dark .bottom-nav-btn.active { color: #38bdf8; }
 
         .expandable-content {
@@ -114,13 +113,13 @@
         #live-map { z-index: 10; }
     </style>
 </head>
-<body class="min-h-screen flex justify-center items-center text-slate-800 dark:text-slate-100 p-0 sm:p-4">
+<body class="min-h-screen flex justify-center text-slate-800 dark:text-slate-100 p-0 sm:p-4">
 
-    <!-- 主容器 -->
-    <div class="w-full max-w-md sm:max-w-lg main-container-bg sm:rounded-[32px] sm:cute-border sm:shadow-[8px_10px_0px_#1e293b] dark:sm:shadow-[8px_10px_0px_#334155] overflow-hidden flex flex-col h-screen sm:h-[92vh] relative">
+    <!-- 主容器：取消固定高度與限制滾動，改為自然垂直展開 -->
+    <div class="w-full max-w-md sm:max-w-lg main-container-bg sm:rounded-[32px] sm:cute-border sm:shadow-[8px_10px_0px_#1e293b] dark:sm:shadow-[8px_10px_0px_#334155] overflow-hidden flex flex-col min-h-screen sm:min-h-[92vh] relative pb-20">
 
-        <!-- 頂部固定標頭 Header -->
-        <header class="p-3.5 bg-white/95 dark:bg-[#1e293b]/95 backdrop-blur-md border-b-3 border-slate-800 dark:border-slate-100 sticky top-0 z-30 space-y-2 shrink-0">
+        <!-- 頂部標頭 Header -->
+        <header class="p-3.5 bg-white/95 dark:bg-[#1e293b]/95 backdrop-blur-md border-b-3 border-slate-800 dark:border-slate-100 sticky top-0 z-30 space-y-2">
             <div class="flex justify-between items-center gap-2">
                 <div class="flex items-center gap-2.5">
                     <div class="w-9 h-9 bg-amber-300 dark:bg-amber-400 cute-border text-slate-900 rounded-xl flex items-center justify-center text-sm font-black shadow-[1.5px_2px_0px_#1e293b] shrink-0">
@@ -147,7 +146,7 @@
         </header>
 
         <!-- 隱藏新增 Drawer -->
-        <div id="quick-form-drawer" class="collapsible bg-amber-50/98 dark:bg-[#172033]/98 border-b-3 border-slate-800 dark:border-slate-100 px-4 py-3 shrink-0 z-20">
+        <div id="quick-form-drawer" class="collapsible bg-amber-50/98 dark:bg-[#172033]/98 border-b-3 border-slate-800 dark:border-slate-100 px-4 py-3 z-20">
             <div class="space-y-2.5">
                 <div class="flex justify-between items-center">
                     <h3 class="text-xs font-black text-slate-800 dark:text-amber-300 uppercase tracking-wider">新增行程或美食</h3>
@@ -173,8 +172,8 @@
             </div>
         </div>
 
-        <!-- 內容區 Scrollable Content -->
-        <div class="p-3.5 space-y-4 overflow-y-auto flex-1 pb-24 pt-3">
+        <!-- 內容區 -->
+        <div class="p-3.5 space-y-4 flex-1">
 
             <!-- TAB 1: DASHBOARD -->
             <div id="tab-dashboard" class="tab-page space-y-4">
@@ -368,7 +367,7 @@
                 </div>
             </div>
 
-            <!-- TAB 6: CLOUD MULTI-USER LOCATION SHARING (方案 B: 雲端即時多人定位 + 自動彈出 GPS 授權) -->
+            <!-- TAB 6: CLOUD MULTI-USER LOCATION SHARING -->
             <div id="tab-location" class="tab-page hidden space-y-3">
                 <div class="cute-card bg-sky-100 dark:bg-sky-950 p-3.5 space-y-3 text-slate-900 dark:text-slate-100">
                     <div class="flex justify-between items-center border-b-2 border-slate-200 pb-2">
@@ -389,18 +388,15 @@
                         </div>
                     </div>
 
-                    <!-- 自動彈出 GPS 授權並同步發布的按鈕 -->
                     <button onclick="triggerFeedback(); requestGPSAndPublish()" class="cute-btn bg-sky-400 hover:bg-sky-500 text-white w-full py-2.5 text-xs font-black flex items-center justify-center gap-1.5 shadow-[2px_2px_0px_#1e293b]">
                         <i class="fa-solid fa-location-arrow"></i> 📡 自動取得 GPS 權限並發布定位
                     </button>
                     <div id="multi-status" class="text-[10px] font-bold text-slate-600 dark:text-slate-400 text-center">點擊上方按鈕將會自動彈出定位請求視窗！</div>
 
-                    <!-- 即時互動 Leaflet 地圖 -->
                     <div class="w-full h-56 rounded-xl overflow-hidden cute-border relative">
                         <div id="live-map" class="w-full h-full"></div>
                     </div>
 
-                    <!-- 在線朋友清單 -->
                     <div class="bg-white dark:bg-slate-900 p-3 rounded-xl cute-border space-y-1.5">
                         <div class="text-[11px] font-black text-slate-800 dark:text-slate-200 flex items-center justify-between">
                             <span>🟢 雲端同步中的同群組旅伴：</span>
@@ -443,7 +439,7 @@
         </div>
 
         <!-- 底部固定導覽列 Bottom App Navigation Bar -->
-        <nav class="bg-white/95 dark:bg-[#1e293b]/95 backdrop-blur-md border-t-3 border-slate-800 dark:border-slate-100 flex items-center justify-around py-1.5 px-1 absolute bottom-0 left-0 right-0 z-30 shrink-0">
+        <nav class="bg-white/95 dark:bg-[#1e293b]/95 backdrop-blur-md border-t-3 border-slate-800 dark:border-slate-100 flex items-center justify-around py-1.5 px-1 fixed sm:absolute bottom-0 left-0 right-0 z-30 shadow-lg">
             <button onclick="triggerFeedback(); switchTab('dashboard')" id="nav-dashboard" class="bottom-nav-btn active">
                 <i class="fa-solid fa-chart-pie text-sm mb-0.5"></i> 總覽
             </button>
@@ -470,7 +466,6 @@
 
     <!-- JavaScript 核心邏輯 -->
     <script>
-        // 初始化 Firebase 免費雲端資料庫 (專用公開測試節點)
         const firebaseConfig = {
             databaseURL: "https://japan-trip-2026-default-rtdb.firebaseio.com/"
         };
@@ -489,7 +484,7 @@
         let defaultSchedules = [
             { day: "Day 1 - 10/25", title: "10:00 淺草寺參拜 ➔ 13:00 秋葉原動漫漫步", route: "乘車指引：從『淺草站』搭乘東京地鐵銀座線至『神田站』，轉乘 JR 山手線 1 站即達『秋葉原站』" },
             { day: "Day 2 - 10/26", title: "09:30 築地市場早餐 ➔ 14:00 澀谷 SHIBUYA SKY", route: "乘車指引：從『築地市場站』搭乘都營大江戶線至『青山一丁目站』，轉乘半藏門線至『澀谷站』" },
-            { day: "Day 3 - 10/27", title: "10:00 明治神宮 ➔ 14:30 新宿御苑散策", route: "乘車指引：從『原宿站`搭乘 JR 山手線直達『新宿站』，東南口步行約 10 分鐘即可抵達新宿御苑" }
+            { day: "Day 3 - 10/27", title: "10:00 明治神宮 ➔ 14:30 新宿御苑散策", route: "乘車指引：從『原宿站』搭乘 JR 山手線直達『新宿站』，東南口步行約 10 分鐘即可抵達新宿御苑" }
         ];
 
         let schedules = JSON.parse(localStorage.getItem('jap_schedules_cute')) || defaultSchedules;
@@ -534,7 +529,6 @@
             }
         }
 
-        /* 雲端多人即時定位 + 自動彈出 GPS 授權 */
         function initLeafletMap(lat, lng) {
             if (!leafMap) {
                 leafMap = L.map('live-map').setView([lat, lng], 14);
@@ -557,7 +551,6 @@
 
             statusEl.innerText = "📍 正在向您的裝置請求 GPS 定位權限...";
 
-            // 這會強制自動彈出瀏覽器的「允許取得您的位置資訊」授權視窗
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
                     const lat = pos.coords.latitude;
@@ -566,7 +559,6 @@
 
                     statusEl.innerText = "☁️ 正在將座標同步至雲端資料庫...";
 
-                    // 寫入 Firebase 雲端資料庫
                     const ref = db.ref('rooms/' + room);
                     const userRef = ref.child(name.replace(/[.#$\/\[\]]/g, "_"));
                     userRef.set({ lat, lng, timestamp }, (error) => {
@@ -592,7 +584,7 @@
 
         function listenRoomLocations(room) {
             const ref = db.ref('rooms/' + room);
-            if (dbListener) ref.off(); // 移除舊監聽
+            if (dbListener) ref.off();
 
             dbListener = ref.on('value', (snapshot) => {
                 const roomData = snapshot.val() || {};
@@ -621,7 +613,6 @@
             });
         }
 
-        /* 翻譯與圖片上傳邏輯 */
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -661,7 +652,6 @@
             }
         }
 
-        /* 介面與導覽切換 */
         function triggerVibration() { if (navigator.vibrate) navigator.vibrate(25); }
         function playClickSound() {
             try {
@@ -736,7 +726,6 @@
         function openDrawer(type) { if (type) { switchTab(type); switchFormType(type); } document.getElementById('quick-form-drawer').classList.add('open'); }
         function closeDrawer() { document.getElementById('quick-form-drawer').classList.remove('open'); }
 
-        /* 渲染行程與美食 */
         function generateScheduleCardsHTML(prefix) {
             if (schedules.length === 0) return `<div class="text-xs text-slate-400 py-6 text-center font-bold">尚無行程</div>`;
             return schedules.map((s, idx) => `
@@ -796,7 +785,6 @@
             closeDrawer(); renderDashboardFoods(); renderFullFoods();
         }
 
-        /* 記帳與計算機 */
         let currentCat = "晚餐"; let calcInput = "";
         function selectAccCategory(catName, iconClass) {
             currentCat = catName;
